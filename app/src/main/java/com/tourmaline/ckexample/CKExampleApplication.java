@@ -1,4 +1,4 @@
-/*******************************************************************************
+/* ******************************************************************************
  * Copyright 2016,2017 Tourmaline Labs, Inc. All rights reserved.
  * Confidential & Proprietary - Tourmaline Labs, Inc. ("TLI")
  *
@@ -34,7 +34,6 @@ import com.tourmaline.context.Engine;
 
 public class CKExampleApplication extends Application {
     private final static String TAG = "CKExampleApp";
-    private boolean tryToRestart;
 
     private final static String ApiKey   = "bdf760a8dbf64e35832c47d8d8dffcc0";
 
@@ -64,26 +63,16 @@ public class CKExampleApplication extends Application {
                 new BroadcastReceiver() {
                     @Override
                     public void onReceive(Context context, Intent i) {
-                        int state = i.getIntExtra("state", -1);
-                        if (state == Engine.INIT_SUCCESS) {
+                        int state = i.getIntExtra("state", Engine.INIT_SUCCESS);
+                        if( state == Engine.INIT_SUCCESS) {
                             Log.w(TAG, "Registering listeners on eng start");
-                            tryToRestart = false;
+                        } else if (state == Engine.INIT_REQUIRED) {
+                            Log.i( TAG,"Engine is trying to restart.");
+                            StartEngine( );
                         } else if (state == Engine.INIT_FAILURE) {
-                            // Handle case of failure after the app is killed
-                            // and restarted by the OS
-                            String msg = i.getStringExtra("message");
-                            int reason = i.getIntExtra("reason", 0);
-                            if(!tryToRestart) {
-                                Log.i( TAG,"Engine is trying to restart.");
-                                tryToRestart = true;
-                                StartEngine( );
-                            } else {
-                                Log.e( TAG, "Engine start KO after trying"
-                                       + " to restart -> nothing to do");
-                                tryToRestart = false;
-                            }
-                            Log.w(TAG, "Eng start failed eng w/ reason "
-                                    + reason + ": " + msg);
+                            final String msg = i.getStringExtra("message");
+                            final int reason = i.getIntExtra("reason", 0);
+                            Log.w(TAG, "Eng start failed eng w/ reason " + reason + ": " + msg);
                         }
                     }
                 },
