@@ -1,4 +1,4 @@
-/*******************************************************************************
+/* ******************************************************************************
  * Copyright 2016 Tourmaline Labs, Inc. All rights reserved.
  * Confidential & Proprietary - Tourmaline Labs, Inc. ("TLI")
  *
@@ -18,7 +18,7 @@
  * application of any third party copyright notice to that third party's
  * code.
  ******************************************************************************/
-package com.tourmaline.ckexample;
+package com.tourmaline.example.adapters;
 
 import android.content.Context;
 import android.widget.ArrayAdapter;
@@ -26,21 +26,21 @@ import android.widget.ArrayAdapter;
 import java.util.HashMap;
 import java.util.List;
 
-class ListAdapter extends ArrayAdapter<String> {
+public class ListAdapter extends ArrayAdapter<String> {
 
-    private final HashMap<String, Integer> mIdMap = new HashMap<>();
+    private final HashMap<String, Integer> map = new HashMap<>();
 
     public ListAdapter(Context context, int resource, List<String> objects) {
         super(context, resource, objects);
         for (int i = 0; i < objects.size(); ++i) {
-            mIdMap.put(objects.get(i), i);
+            map.put(objects.get(i), i);
         }
     }
 
     @Override
     public long getItemId(int position) {
-        String item = getItem(position);
-        return mIdMap.get(item);
+        final String item = getItem(position);
+        return map.get(item);
     }
 
     @Override
