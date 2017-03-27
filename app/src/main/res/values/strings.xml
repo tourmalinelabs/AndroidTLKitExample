@@ -4,14 +4,13 @@
     <string name="context_engine">TLKit</string>
     <string name="monitoring">Monitoring</string>
     <string name="not_monitoring">Not monitoring</string>
-    <string name="action_settings">Settings</string>
     <string name="start">Start Monitoring</string>
     <string name="stop">Stop Monitoring</string>
-    <string name="stop_detection">Stop Detection</string>
     <string name="monitoring_apis">Monitoring API\'s</string>
     <string name="drives">Drives</string>
     <string name="locations">Locations</string>
     <string name="title_activity_drives">DrivesActivity</string>
     <string name="no_data">No data</string>
     <string name="title_activity_locations">LocationsActivity</string>
+    <string name="please_wait">Please wait...</string>
 </resources>
