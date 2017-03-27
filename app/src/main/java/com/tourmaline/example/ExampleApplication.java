@@ -18,7 +18,7 @@
  * application of any third party copyright notice to that third party's
  * code.
  ******************************************************************************/
-package com.tourmaline.ckexample;
+package com.tourmaline.example;
 
 import android.app.Application;
 import android.content.BroadcastReceiver;
@@ -32,53 +32,62 @@ import com.tourmaline.context.CompletionListener;
 import com.tourmaline.context.DefaultAuthMgr;
 import com.tourmaline.context.Engine;
 
-public class CKExampleApplication extends Application {
-    private final static String TAG = "CKExampleApp";
+public class ExampleApplication extends Application {
+    private static final String TAG = "ExampleApplication";
 
-    private final static String ApiKey   = "bdf760a8dbf64e35832c47d8d8dffcc0";
+    private static final String ApiKey    = "bdf760a8dbf64e35832c47d8d8dffcc0";
+    private static final String user      = "example@tourmalinelabs.com";
+    private static final String password  = "password";
 
-    public void StartEngine() {
-        Engine.Init( this,
-                     ApiKey,
-                     new DefaultAuthMgr( this,
-                                        ApiKey,
-                                        "example@tourmalinelabs.com",
-                                        "password"),
-                     new CompletionListener() {
-                         @Override
-                         public void OnSuccess() { Engine.Monitoring(true); }
 
-                         @Override
-                         public void OnFail( int i, String s ) {}
-                     } );
+    // startEngine is invoked in 2 cases:
+    // - The first time the Start Monitoring Button in the MainActivity is clicked, to launch the engine,
+    // - When Engine.INIT_REQUIRED is triggered by the LocalBroadcastManager. This situation
+    // corresponds to the case where the application has quit (force quit, device reboot...)
+    // and the Engine need to restart so it must be initialized again.
+    public void startEngine(final CompletionListener completionListener) {
+
+        final Engine.AuthMgr authManager = new DefaultAuthMgr(this, ApiKey, user, password);
+
+        final CompletionListener initListener = new CompletionListener() {
+            @Override
+            public void OnSuccess() {
+                if(completionListener!=null) completionListener.OnSuccess();
+            }
+            @Override
+            public void OnFail( int i, String s ) {
+                if(completionListener!=null) completionListener.OnFail(i, s);
+            }
+        };
+
+        Engine.Init(this, ApiKey, authManager, initListener);
     }
+
     @Override
     public void onCreate() {
         super.onCreate();
+
         // Want to attach the lifecycle broadcast listener to the application
         // context since that is the only context guaranteed to last for full
         // application lifetime
-        LocalBroadcastManager mgr = LocalBroadcastManager.getInstance(this);
+        final LocalBroadcastManager mgr = LocalBroadcastManager.getInstance(this);
         mgr.registerReceiver(
                 new BroadcastReceiver() {
                     @Override
                     public void onReceive(Context context, Intent i) {
                         int state = i.getIntExtra("state", Engine.INIT_SUCCESS);
                         if( state == Engine.INIT_SUCCESS) {
-                            Log.w(TAG, "Registering listeners on eng start");
+                            Log.i(TAG, "ENGINE INIT SUCCESS");
                         } else if (state == Engine.INIT_REQUIRED) {
-                            Log.i( TAG,"Engine is trying to restart.");
-                            StartEngine( );
+                            Log.i( TAG,"ENGINE INIT REQUIRED");
+                            startEngine(null);
                         } else if (state == Engine.INIT_FAILURE) {
                             final String msg = i.getStringExtra("message");
                             final int reason = i.getIntExtra("reason", 0);
-                            Log.w(TAG, "Eng start failed eng w/ reason " + reason + ": " + msg);
+                            Log.e(TAG, "ENGINE INIT FAILURE" + reason + ": " + msg);
                         }
                     }
                 },
                 new IntentFilter(Engine.ACTION_LIFECYCLE));
-        StartEngine(  );
     }
-
-
 }

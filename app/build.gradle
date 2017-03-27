@@ -26,11 +26,7 @@ android {
 }
 
 dependencies {
-    compile "com.tourmalinelabs.android:TLKit:7.0.17032300@aar"
-    compile 'com.android.support:appcompat-v7:25.3.0'
 
-    compile 'com.google.android.gms:play-services-base:8.1.0@aar'
-    compile 'com.google.maps:google-maps-services:0.1.5'
-    compile 'com.google.android.gms:play-services-location:8.1.0'
-    compile 'com.google.maps.android:android-maps-utils:0.3+'
+    compile ("com.tourmalinelabs.android:TLKit:7.0.17032300@aar") { transitive=true }
+
 }
