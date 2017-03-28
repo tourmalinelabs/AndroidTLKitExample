@@ -31,36 +31,26 @@ import android.util.Log;
 import com.tourmaline.context.CompletionListener;
 import com.tourmaline.context.DefaultAuthMgr;
 import com.tourmaline.context.Engine;
+import com.tourmaline.example.helpers.Preferences;
 
 public class ExampleApplication extends Application {
     private static final String TAG = "ExampleApplication";
+
+    public static final String LAST_MONITORING_STATE = "PrefLastMonitoringState";
 
     private static final String ApiKey    = "bdf760a8dbf64e35832c47d8d8dffcc0";
     private static final String user      = "example@tourmalinelabs.com";
     private static final String password  = "password";
 
     // startEngine() is invoked in 2 cases:
-    // - The first time the Start Monitoring Button in the MainActivity is clicked, to launch the engine,
+    // - When the Start Monitoring Button in the MainActivity is clicked for the first time,
+    // to launch the engine,
     // - When Engine.INIT_REQUIRED is triggered by the LocalBroadcastManager. This situation
     // corresponds to the case where the application has quit (force quit, device reboot...)
     // and the Engine need to restart so it must be initialized again.
     public void startEngine(final CompletionListener completionListener) {
-
         final Engine.AuthMgr authManager = new DefaultAuthMgr(this, ApiKey, user, password);
-
-        final CompletionListener initListener = new CompletionListener() {
-            @Override
-            public void OnSuccess() {
-                Log.i(TAG, "startEngine OnSuccess -> monitoring:" + Engine.Monitoring());
-                if(completionListener!=null) { completionListener.OnSuccess(); }
-            }
-            @Override
-            public void OnFail( int i, String s ) {
-                if(completionListener!=null) { completionListener.OnFail(i, s); }
-            }
-        };
-
-        Engine.Init(this, ApiKey, authManager, initListener);
+        Engine.Init(this, ApiKey, authManager, completionListener);
     }
 
     @Override
@@ -79,8 +69,16 @@ public class ExampleApplication extends Application {
                         if( state == Engine.INIT_SUCCESS) {
                             Log.i(TAG, "ENGINE INIT SUCCESS");
                         } else if (state == Engine.INIT_REQUIRED) {
-                            Log.i( TAG,"ENGINE INIT REQUIRED");
-                            startEngine(null);
+                            Log.i( TAG,"ENGINE INIT REQUIRED: Engine needs to restart in background...");
+                            startEngine(new CompletionListener() {
+                                @Override
+                                public void OnSuccess() {
+                                    final boolean autoStartMonitoring = Preferences.getInstance(getApplicationContext()).getBoolean(LAST_MONITORING_STATE, false);
+                                    Engine.Monitoring(autoStartMonitoring);
+                                }
+                                @Override
+                                public void OnFail(int i, String s) {}
+                            });
                         } else if (state == Engine.INIT_FAILURE) {
                             final String msg = i.getStringExtra("message");
                             final int reason = i.getIntExtra("reason", 0);

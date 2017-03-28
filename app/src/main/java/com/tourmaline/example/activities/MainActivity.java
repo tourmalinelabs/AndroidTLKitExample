@@ -24,6 +24,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.View;
@@ -44,8 +45,6 @@ import com.tourmaline.example.helpers.Preferences;
 public class MainActivity extends Activity {
     private static final String TAG = "MainActivity";
 
-    private static final String AUTO_START_MONITORING = "PrefAutoStartMonitoring";
-
     private static final int PERMISSIONS_REQUEST = 0;
     private LinearLayout apiLayout;
     private TextView engStateTextView;
@@ -61,8 +60,6 @@ public class MainActivity extends Activity {
         engStateTextView = (TextView) findViewById(R.id.engine_State);
         startButton = (Button) findViewById(R.id.start_button);
         stopButton = (Button) findViewById(R.id.stop_button);
-
-        makeUIChangesOnEngineMonitoring(Engine.Monitoring());
 
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -96,7 +93,9 @@ public class MainActivity extends Activity {
             }
         });
 
-        if(Preferences.getInstance(getApplicationContext()).getBoolean(AUTO_START_MONITORING, false)) {
+        makeUIChangesOnEngineMonitoring(Engine.Monitoring());
+
+        if(Preferences.getInstance(getApplicationContext()).getBoolean(ExampleApplication.LAST_MONITORING_STATE, false)) {
             tryToStartMonitoring();
         }
     }
@@ -143,16 +142,16 @@ public class MainActivity extends Activity {
     private void startMonitoring() {
         Engine.Monitoring(true);
         makeUIChangesOnEngineMonitoring(true);
-        Preferences.getInstance(getApplicationContext()).putBoolean(AUTO_START_MONITORING, true);
+        Preferences.getInstance(getApplicationContext()).putBoolean(ExampleApplication.LAST_MONITORING_STATE, true);
     }
 
     private void stopMonitoring() {
         Engine.Monitoring(false);
         makeUIChangesOnEngineMonitoring(false);
-        Preferences.getInstance(getApplicationContext()).putBoolean(AUTO_START_MONITORING, false);
+        Preferences.getInstance(getApplicationContext()).putBoolean(ExampleApplication.LAST_MONITORING_STATE, false);
     }
 
-    private boolean permissionGranted(String permissions[], int[] grantResults) {
+    private boolean permissionGranted(@NonNull String permissions[], @NonNull int[] grantResults) {
         boolean permissionGranted = true;
         for ( int i = 0; i < grantResults.length; ++i ) {
             if( grantResults[i] != PackageManager.PERMISSION_GRANTED) {
@@ -164,7 +163,7 @@ public class MainActivity extends Activity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
         if(requestCode == PERMISSIONS_REQUEST) {
             if(permissionGranted(permissions, grantResults) ) {
                 Log.i( TAG, "All permissions granted");

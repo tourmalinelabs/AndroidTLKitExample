@@ -136,7 +136,7 @@ public class LocationsActivity extends Activity {
 
         final Calendar calendar = Calendar.getInstance();
         final Date endTime = calendar.getTime();
-        calendar.add(Calendar.DATE, -2);
+        calendar.add(Calendar.DATE, -7);
         final Date startTime = calendar.getTime();
 
         LocationManager.QueryLocations(startTime.getTime(),endTime.getTime(), 50, queryHandler);
