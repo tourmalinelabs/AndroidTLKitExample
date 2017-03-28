@@ -35,6 +35,8 @@ import com.tourmaline.example.adapters.ListAdapter;
 import com.tourmaline.example.R;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 public class LocationsActivity extends Activity {
     private static final String LOG_AREA = "LocationsActivity";
@@ -132,6 +134,11 @@ public class LocationsActivity extends Activity {
             }
         };
 
-        LocationManager.QueryLocations(0, Long.MAX_VALUE, 50, queryHandler);
+        final Calendar calendar = Calendar.getInstance();
+        final Date endTime = calendar.getTime();
+        calendar.add(Calendar.DATE, -2);
+        final Date startTime = calendar.getTime();
+
+        LocationManager.QueryLocations(startTime.getTime(),endTime.getTime(), 50, queryHandler);
     }
 }

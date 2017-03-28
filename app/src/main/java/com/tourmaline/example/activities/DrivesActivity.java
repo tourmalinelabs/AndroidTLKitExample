@@ -36,6 +36,7 @@ import com.tourmaline.example.adapters.ListAdapter;
 import com.tourmaline.example.R;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 
 public class DrivesActivity extends Activity {
@@ -138,6 +139,10 @@ public class DrivesActivity extends Activity {
             }
         };
 
-        ActivityManager.GetDrives(new Date( 0L), new Date(), queryHandler);
+        final Calendar calendar = Calendar.getInstance();
+        final Date endTime = calendar.getTime();
+        calendar.add(Calendar.DATE, -7);
+        final Date startTime = calendar.getTime();
+        ActivityManager.GetDrives(startTime, endTime, queryHandler);
     }
 }

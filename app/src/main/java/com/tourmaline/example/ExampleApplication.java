@@ -39,8 +39,7 @@ public class ExampleApplication extends Application {
     private static final String user      = "example@tourmalinelabs.com";
     private static final String password  = "password";
 
-
-    // startEngine is invoked in 2 cases:
+    // startEngine() is invoked in 2 cases:
     // - The first time the Start Monitoring Button in the MainActivity is clicked, to launch the engine,
     // - When Engine.INIT_REQUIRED is triggered by the LocalBroadcastManager. This situation
     // corresponds to the case where the application has quit (force quit, device reboot...)
@@ -52,11 +51,12 @@ public class ExampleApplication extends Application {
         final CompletionListener initListener = new CompletionListener() {
             @Override
             public void OnSuccess() {
-                if(completionListener!=null) completionListener.OnSuccess();
+                Log.i(TAG, "startEngine OnSuccess -> monitoring:" + Engine.Monitoring());
+                if(completionListener!=null) { completionListener.OnSuccess(); }
             }
             @Override
             public void OnFail( int i, String s ) {
-                if(completionListener!=null) completionListener.OnFail(i, s);
+                if(completionListener!=null) { completionListener.OnFail(i, s); }
             }
         };
 

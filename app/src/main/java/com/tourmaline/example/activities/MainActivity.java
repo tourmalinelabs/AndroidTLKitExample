@@ -39,9 +39,13 @@ import com.tourmaline.context.CompletionListener;
 import com.tourmaline.context.Engine;
 import com.tourmaline.example.ExampleApplication;
 import com.tourmaline.example.R;
+import com.tourmaline.example.helpers.Preferences;
 
 public class MainActivity extends Activity {
     private static final String TAG = "MainActivity";
+
+    private static final String AUTO_START_MONITORING = "PrefAutoStartMonitoring";
+
     private static final int PERMISSIONS_REQUEST = 0;
     private LinearLayout apiLayout;
     private TextView engStateTextView;
@@ -91,13 +95,17 @@ public class MainActivity extends Activity {
                 startActivity(intent);
             }
         });
+
+        if(Preferences.getInstance(getApplicationContext()).getBoolean(AUTO_START_MONITORING, false)) {
+            tryToStartMonitoring();
+        }
     }
 
     private void tryToStartMonitoring() {
         final int googlePlayStat = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this);
         if (googlePlayStat != ConnectionResult.SUCCESS) { //check GooglePlayServices
             Log.i( TAG, "Google play status is " + googlePlayStat );
-            startButton.setEnabled(false);
+            stopMonitoring();
             try {
                 GooglePlayServicesUtil.getErrorDialog(googlePlayStat, this, 0).show();
             } catch ( Exception e ) {
@@ -108,22 +116,20 @@ public class MainActivity extends Activity {
             if (missingPerms.length > 0) { //Check Permissions (Location)
                 ActivityCompat.requestPermissions(this, missingPerms, PERMISSIONS_REQUEST);
             } else {
-                startMonitoring();
+                startEngineAndMonitoring();
             }
         }
     }
 
-    private void startMonitoring() {
+    private void startEngineAndMonitoring() {
         boolean isEngineRunning = Engine.IsInitialized();
         if (isEngineRunning) { //check Engine State
-            Engine.Monitoring(true);
-            makeUIChangesOnEngineMonitoring(true);
+           startMonitoring();
         } else {
             ((ExampleApplication)getApplication()).startEngine(new CompletionListener() {
                 @Override
                 public void OnSuccess() {
-                    Engine.Monitoring(true);
-                    makeUIChangesOnEngineMonitoring(true);
+                    startMonitoring();
                 }
 
                 @Override
@@ -134,9 +140,16 @@ public class MainActivity extends Activity {
         }
     }
 
+    private void startMonitoring() {
+        Engine.Monitoring(true);
+        makeUIChangesOnEngineMonitoring(true);
+        Preferences.getInstance(getApplicationContext()).putBoolean(AUTO_START_MONITORING, true);
+    }
+
     private void stopMonitoring() {
         Engine.Monitoring(false);
         makeUIChangesOnEngineMonitoring(false);
+        Preferences.getInstance(getApplicationContext()).putBoolean(AUTO_START_MONITORING, false);
     }
 
     private boolean permissionGranted(String permissions[], int[] grantResults) {
@@ -155,9 +168,10 @@ public class MainActivity extends Activity {
         if(requestCode == PERMISSIONS_REQUEST) {
             if(permissionGranted(permissions, grantResults) ) {
                 Log.i( TAG, "All permissions granted");
-                startMonitoring();
+                startEngineAndMonitoring();
             } else {
                 Log.i( TAG, "permissions missing!");
+                stopMonitoring();
                 Toast.makeText(MainActivity.this, "Permissions missing!", Toast.LENGTH_LONG).show();
             }
         }
