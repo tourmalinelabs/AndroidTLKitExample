@@ -12,35 +12,28 @@ a simple working example of how developers can use TLKit.
 
 # Integrating TLKit into a project
 
-Add the TLKit library to a gradle project as follows.
+## 1 / Add the TLKit library 
+it consists to modify your `build.gradle` file as follows.
 
-Copy the SDK aar (`ContextKit-<version>.aar`, located in the `android/` 
-directory to the `libs` directory of the project, creating the `libs` 
-directory it if necessary.
-
-Modify the `build.gradle` file as follows:
-
-Add `libs` as a repository
+##### Add the TLKIT artifact's repository
 
 ```groovy
 repositories {
     maven{ url 'https://raw.githubusercontent.com/tourmalinelabs/AndroidTLKitSDK/master'}
 }
 ```    
+*Add this repository section directly at the top level of the `build.gradle` and not under the `buildscript` section.*
 
-Add the SDK as a dependency as well as it's dependencies.
+##### Add the TLKit as a dependency.
 
 ```groovy
 dependencies {
-    compile "com.tourmalinelabs.android:TLKit:7.0.17032300@aar"
- 
-    compile 'com.android.support:appcompat-v7:25.3.0'
-    compile 'com.google.android.gms:play-services-base:8.1.0@aar'
-    compile 'com.google.android.gms:play-services-location:8.1.0'
+    compile ("com.tourmalinelabs.android:TLKit:7.0.17032801@aar") { transitive=true }
 }
 ```
+*The transitive directive allows your project to automatically add the TLKIT own dependencies.*
 
-## Add user permissions to the manifest 
+## 2 / Add user permissions 
 
 Add the following the following permissions to the `Manifest.xml`.
 
@@ -48,15 +41,12 @@ Add the following the following permissions to the `Manifest.xml`.
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
 ...
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
-    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
 ....
 </manifest>
 ```
@@ -90,19 +80,16 @@ Initialization with the `DefaultAuthMgr` is covered in the next section.
 An example of initializing the engine with the `DefaultAuthMgr` is provided here:
     
 ```java
-Engine.Init( getApplicationContext(),
-             ApiKey,
-             new DefaultAuthMgr( this,
-                                ApiKey,
-                                "example@tourmalinelabs.com",
-                                "password"),
-             new CompletionListener() {
-                 @Override
-                 public void OnSuccess() { Engine.Monitoring(true); }
-
-                 @Override
-                 public void OnFail( int i, String s ) {}
-             } );
+Engine.Init(getApplicationContext(),
+            ApiKey,
+            new DefaultAuthMgr("example@tourmalinelabs.com",
+                               "password"),
+            new CompletionListener() {
+                @Override
+                public void OnSuccess() { Engine.Monitoring(true); }
+                @Override
+                public void OnFail( int i, String s ) {}
+            });
 
 ```
 
@@ -136,35 +123,34 @@ restarts with the app the intent will be the only notification that the engine
 is running.
 
 ```java
-LocalBroadcastManager mgr = LocalBroadcastManager.getInstance(this);
-mgr.registerReceiver(
-        new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent i) {
-                int state = i.getIntExtra("state", -1);
-                if (state == Engine.INIT_SUCCESS) {
-                    Log.w(TAG, "Registering listeners on eng start");
-                    tryToRestart = false;
-                } else if (state == Engine.INIT_FAILURE) {
-                    // Handle case of failure after the app is killed
-                    // and restarted by the OS
-                    String msg = i.getStringExtra("message");
-                    int reason = i.getIntExtra("reason", 0);
-                    if(!tryToRestart) {
-                        Log.i( TAG,"Engine is trying to restart.");
-                        tryToRestart = true;
-                        StartEngine( );
-                    } else {
-                        Log.e( TAG, "Engine start KO after trying"
-                               + " to restart -> nothing to do");
-                        tryToRestart = false;
+final LocalBroadcastManager mgr = LocalBroadcastManager.getInstance((getApplicationContext());
+        mgr.registerReceiver(
+                new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent i) {
+                        int state = i.getIntExtra("state", Engine.INIT_SUCCESS);
+                        if( state == Engine.INIT_SUCCESS) {
+                            Log.i(TAG, "ENGINE INIT SUCCESS");
+                        } else if (state == Engine.INIT_REQUIRED) {
+                            Log.i( TAG,"ENGINE INIT REQUIRED: Engine needs to restart in background...");
+                            Engine.Init( getApplicationContext(),
+                                         ApiKey,
+                                         new DefaultAuthMgr("example@tourmalinelabs.com", "password"),
+                                         new CompletionListener() {
+                                            @Override
+                                            public void OnSuccess() { Engine.Monitoring(true); }
+                                            @Override
+                                            public void OnFail( int i, String s ) {}
+                                         });
+                        } else if (state == Engine.INIT_FAILURE) {
+                            final String msg = i.getStringExtra("message");
+                            final int reason = i.getIntExtra("reason", 0);
+                            Log.e(TAG, "ENGINE INIT FAILURE" + reason + ": " + msg);
+                        }
                     }
-                    Log.w(TAG, "Eng start failed eng w/ reason "
-                            + reason + ": " + msg);
-                }
-            }
-        },
-        new IntentFilter(Engine.ACTION_LIFECYCLE));
+                },
+                new IntentFilter(Engine.ACTION_LIFECYCLE));
+    }
 ```
 
 ## Monitoring API
@@ -179,34 +165,38 @@ Engine.Monitoring( true );
 Monitoring can be disabled at any time as follows
 
 ```java
-Engine.Monitoring( true );
+Engine.Monitoring( false );
 ```
 
-If monitoring is enabled at any point during a drive that drive will be 
-recorded.
+If monitoring is enabled at any point during a drive that drive will be recorded.
 
 ## Drive monitoring API
 
 Listeners can be registered to receive Drive events. Note: They 
-will only receive these events when monitoring is enabled. There is also an API
-for querying past drives.
+will only receive these events when monitoring is enabled. There is also an API for querying past drives.
 
 ###  Registering for drive events 
 
 Register a drive listener can be done as follows:
 
 ```java
-ActivityListener l = new ActivityListener() {
+ActivityListener listener = new ActivityListener() {
     @Override
-    public void OnEvent( ActivityEvent e ) { Log.d(TAG, "Evt: " + e ); }
+    public void OnEvent( ActivityEvent e ) { 
+    	Log.d("ActivityListener", "Activity event received: " + e ); 
+    }
 
     @Override
-    public void RegisterSucceeded() { Log.d(TAG, "Reg succeeded" ); }
+    public void RegisterSucceeded() { 
+    	Log.d("ActivityListener", "registered!" ); 
+    }
 
     @Override
-    public void RegisterFailed( int e ) { Log.w(TAG, "Reg err:" + e ); }
+    public void RegisterFailed( int e ) { 
+    	Log.e("ActivityListener", "register failed w/reason " + reason + " :)" ); 
+    }
 };
-ActivityManager.RegisterDriveListener(l);
+ActivityManager.RegisterDriveListener(listener);
 ```        
 
 Multiple listeners can be registered via this API and all listeners will
@@ -219,7 +209,7 @@ map points.
 To stop receiving drive monitoring unregister the listener as follows:
 
 ```java
-ActivityManager.UnregisterDriveListener(l);
+ActivityManager.UnregisterDriveListener(listener);
 ```      
 
 ### Querying drive history
@@ -227,14 +217,15 @@ ActivityManager.UnregisterDriveListener(l);
 Some amount of drives are available for querying as follows.
 
 ```java 
-ActivityManager.GetDrives( new Date( 0L),
+ActivityManager.GetDrives( new Date(0L),
                            new Date(),
+                           20,
                            new QueryHandler<ArrayList<Drive>>() {
     @Override
     public void Result( ArrayList<Drive> drives ) {
         Log.d("DriveMonitor", "Recorded drives:");
-            for (DriveEvent e  : evts) {
-                Log.d("DriveMonitor", e.toString());
+            for (Drive drive  : drives) {
+                Log.d("DriveMonitor", drive.toString());
             }
     }
 
@@ -255,34 +246,33 @@ only solutions.
 A listener can be registered as follows.
 
 ```java 
-LocationListener lstnr = new LocationListener() {
+LocationListener listener = new LocationListener() {
     @Override
     public void OnLocationUpdated (Location l) {
-        Log.d("LocListnr", "Location received: " + l );
+        Log.d("Location listener", "Location received: " + l );
     }
 
     @Override
     public void RegisterSucceeded () {
-        Log.d("LocListner", "Location listener registered! ");
+        Log.d("Location listener", "registered! ");
 
     }
 
     @Override
     public void RegisterFailed (int reason) {
-        Log.e("LocListnr",
-              "Listener register failed w/reason " + reason + " :)"  );
+        Log.e("Location listener",
+              "register failed w/reason " + reason + " :)"  );
     }
 };
-LocationManager.RegisterLocationListener( lstnr );
+LocationManager.RegisterLocationListener(listener);
 ``` 
 
-Note: They will only receive these events when monitoring is enabled. There is also an API
-for querying past drives.
+Note: They will only receive these events when monitoring is enabled. There is also an API for querying past locations.
 
 A listener can be unregistered as follows:
 
 ```java
-LocationManager.UnregisterLocationListener( lstnr );
+LocationManager.UnregisterLocationListener(listener);
 ```
 
 
@@ -291,23 +281,22 @@ LocationManager.UnregisterLocationListener( lstnr );
 TLKit provides the ability to query past locations via 
 `QueryLocations` method of the Engine. These can be used as follows:
 
-```java    
-LocationManager.QueryLocations(0, Long.MAX_VALUE, 1,
-                      new Engine.LocationQueryResultHandler() {
-    @Override
-    public void Results (List<Location> locs) {
-        Log.d( "Activity", "Locations" );
-        for( Location l: locs ) {
-            Log.d(TAG, "    " + l.toString() );
-        }
-    }
-    @Override
-    public void Failed( int reason ) {
-        Log.e( "Activity",
-               "Query failed w/err: " + reason );
-    }});
+```java 
+LocationManager.QueryLocations(0L, Long.MAX_VALUE, 20, new QueryHandler<ArrayList<Location>>() {
+            @Override
+            public void Result(ArrayList<Location> locations) {
+                Log.d( "QueryLocations", "Recorded locations" );
+        			for( Location location: locations ) {
+            			Log.d("QueryLocations", location.toString() );
+        			}
+            }
+
+            @Override
+            public void OnFail(int i, String s) {
+				Log.e("QueryLocations", "Query failed with err: " + i );
+            }
+        });
 ```
 
-Note: This will only include locations that were recorded when monitoring was 
-enabled.
+Note: This will only include locations that were recorded when monitoring was enabled.
 

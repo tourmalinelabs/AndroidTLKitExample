@@ -21,7 +21,9 @@
 package com.tourmaline.example.activities;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.os.Bundle;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
@@ -31,6 +33,7 @@ import com.tourmaline.context.ActivityEvent;
 import com.tourmaline.context.ActivityListener;
 import com.tourmaline.context.ActivityManager;
 import com.tourmaline.context.Drive;
+import com.tourmaline.context.Point;
 import com.tourmaline.context.QueryHandler;
 import com.tourmaline.example.adapters.ListAdapter;
 import com.tourmaline.example.R;
@@ -69,7 +72,7 @@ public class DrivesActivity extends Activity {
                 @Override
                 public void OnEvent( ActivityEvent activityEvent ) {
                     Log.i(LOG_AREA, "Activity Listener: new event");
-                    if(activityEvent.Type() == activityEvent.ACTIVITY_FINALIZED) {
+                    if(activityEvent.Type() == ActivityEvent.ACTIVITY_FINALIZED) {
                         updateDrives();
                     }
                 }
@@ -96,6 +99,10 @@ public class DrivesActivity extends Activity {
     }
 
     private void updateDrives() {
+        final ProgressDialog progress = new ProgressDialog(this);
+        progress.setMessage("Please wait...");
+        progress.show();
+
         final ListView drivesListView = (ListView) findViewById(R.id.drives_list);
         final TextView noDataTextView = (TextView) findViewById(R.id.no_data_text_view);
 
@@ -103,30 +110,31 @@ public class DrivesActivity extends Activity {
             @Override
             public void Result( ArrayList<Drive> drives ) {
                 if (drives != null && !drives.isEmpty()) {
-                    Log.i(LOG_AREA, "Recorded drives:");
+                    Log.i(LOG_AREA, drives.size() + " recorded drives:");
                     final ArrayList<String> list = new ArrayList<>();
-                    for (Drive d : drives) {
-                        Log.i(LOG_AREA, d.toString());
-                        list.add(d.toString());
+                    for (Drive drive : drives) {
+                        final String driveDescription = driveDescription(drive);
+                        Log.i(LOG_AREA, driveDescription);
+                        list.add(driveDescription);
                     }
+                    final ListAdapter adapter = new ListAdapter(DrivesActivity.this, android.R.layout.simple_list_item_1, list);
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            ListAdapter adapter =
-                                    new ListAdapter(DrivesActivity.this,
-                                            android.R.layout.simple_list_item_1,
-                                            list);
                             drivesListView.setAdapter(adapter);
                             noDataTextView.setVisibility(View.GONE);
                             drivesListView.setVisibility(View.VISIBLE);
+                            progress.dismiss();
                         }
                     });
                 } else {
+                    Log.i(LOG_AREA, "No recorded drives:");
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             noDataTextView.setVisibility(View.VISIBLE);
                             drivesListView.setVisibility(View.INVISIBLE);
+                            progress.dismiss();
                         }
                     });
                 }
@@ -135,7 +143,12 @@ public class DrivesActivity extends Activity {
             @Override
             public void OnFail( int i, String s ) {
                 Log.e(LOG_AREA, "Query failed with err: " + i);
-
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        progress.dismiss();
+                    }
+                });
             }
         };
 
@@ -143,6 +156,24 @@ public class DrivesActivity extends Activity {
         final Date endTime = calendar.getTime();
         calendar.add(Calendar.DATE, -7);
         final Date startTime = calendar.getTime();
-        ActivityManager.GetDrives(startTime, endTime, queryHandler);
+        ActivityManager.GetDrives(startTime, endTime, 20, queryHandler);
+    }
+
+    private String driveDescription(final Drive drive) {
+        final String Id = "Id: " + drive.Id().toString().substring(0, 20) + " ... ";
+        final String distance = "Distance: " + drive.Distance()/1000.0f + " km";
+        final int formatFlags = DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_ABBREV_MONTH| DateUtils.FORMAT_NO_YEAR;
+        final String startTime = "Start Time: " + DateUtils.formatDateTime(this, drive.StartTime(), formatFlags);
+        final String endTime = "End Time: " + DateUtils.formatDateTime(this, drive.EndTime(), formatFlags);
+        final String startAddress = "Start Address: " + ((drive.StartAddress()!=null && drive.StartAddress().length()>20)?drive.StartAddress().substring(0, 20):"") + " ... ";
+        final String endAddress = "End Address: " + ((drive.EndAddress()!=null &&  drive.EndAddress().length()>20)?drive.EndAddress().substring(0, 20):"") + " ... ";
+        final ArrayList<Point> locations = drive.Locations();
+        String startPoint = "Start Location: ";
+        String endPoint = "End Location: ";
+        if(locations!=null && locations.size()>1) {
+            startPoint += locations.get(0).Latitude() + ", " + locations.get(0).Longitude();
+            endPoint += locations.get(locations.size()-1).Latitude() + ", " + locations.get(locations.size()-1).Longitude();
+        }
+        return Id + "\n" + distance + "\n" + startTime + "\n" + endTime + "\n" + startPoint + "\n" + startAddress + "\n" + endPoint + "\n" + endAddress + "\n";
     }
 }

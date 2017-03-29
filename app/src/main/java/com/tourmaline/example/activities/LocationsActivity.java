@@ -21,7 +21,9 @@
 package com.tourmaline.example.activities;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.os.Bundle;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
@@ -93,6 +95,10 @@ public class LocationsActivity extends Activity {
     }
 
     private void updateLocations() {
+        final ProgressDialog progress = new ProgressDialog(this);
+        progress.setMessage("Please wait...");
+        progress.show();
+
         final ListView locationsListView = (ListView) findViewById(R.id.locations_list);
         final TextView noDataTextView = (TextView) findViewById(R.id.no_data_text_view);
 
@@ -100,30 +106,31 @@ public class LocationsActivity extends Activity {
             @Override
             public void Result( ArrayList<Location> locs ) {
                 if (locs != null && !locs.isEmpty()) {
-                    Log.i(LOG_AREA, "Locations: ");
+                    Log.i(LOG_AREA, locs.size() + " recorded locations: ");
                     final ArrayList<String> list = new ArrayList<>();
-                    for (Location l : locs) {
-                        Log.i(LOG_AREA, "    " + l.toString());
-                        list.add(l.toString());
+                    for (Location location : locs) {
+                        final String locationDescription = locationDescription(location);
+                        Log.i(LOG_AREA, locationDescription);
+                        list.add(locationDescription);
                     }
+                    final ListAdapter adapter = new ListAdapter(LocationsActivity.this, android.R.layout.simple_list_item_1, list);
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            ListAdapter adapter =
-                                    new ListAdapter(LocationsActivity.this,
-                                            android.R.layout.simple_list_item_1,
-                                            list);
                             locationsListView.setAdapter(adapter);
                             noDataTextView.setVisibility(View.GONE);
                             locationsListView.setVisibility(View.VISIBLE);
+                            progress.dismiss();
                         }
                     });
                 } else {
+                    Log.i(LOG_AREA, "No recorded drives:");
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             noDataTextView.setVisibility(View.VISIBLE);
                             locationsListView.setVisibility(View.INVISIBLE);
+                            progress.dismiss();
                         }
                     });
                 }
@@ -131,6 +138,12 @@ public class LocationsActivity extends Activity {
             @Override
             public void OnFail( int i, String s ) {
                 Log.e(LOG_AREA, "Query failed with err: " + i);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        progress.dismiss();
+                    }
+                });
             }
         };
 
@@ -139,6 +152,15 @@ public class LocationsActivity extends Activity {
         calendar.add(Calendar.DATE, -7);
         final Date startTime = calendar.getTime();
 
-        LocationManager.QueryLocations(startTime.getTime(),endTime.getTime(), 50, queryHandler);
+        LocationManager.QueryLocations(startTime.getTime(),endTime.getTime(), 20, queryHandler);
+    }
+
+    private String locationDescription(final Location location) {
+        final String latLng = "Location: " + location.lat + ", " + location.lng;
+        final int formatFlags = DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_ABBREV_MONTH| DateUtils.FORMAT_NO_YEAR;
+        final String time = "Time: " + DateUtils.formatDateTime(this, location.ts, formatFlags);
+        final String address = "Address: " + ((location.address!=null && location.address.length()>20)?location.address.substring(0, 20):"") + " ... ";
+        final String state = "State: " + location.StateStr();
+        return latLng + "\n" + time + "\n" + address + "\n" + state + "\n";
     }
 }

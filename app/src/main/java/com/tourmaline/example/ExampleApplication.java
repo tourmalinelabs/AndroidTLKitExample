@@ -49,7 +49,7 @@ public class ExampleApplication extends Application {
     // corresponds to the case where the application has quit (force quit, device reboot...)
     // and the Engine need to restart so it must be initialized again.
     public void startEngine(final CompletionListener completionListener) {
-        final Engine.AuthMgr authManager = new DefaultAuthMgr(this, ApiKey, user, password);
+        final Engine.AuthMgr authManager = new DefaultAuthMgr(user, password);
         Engine.Init(this, ApiKey, authManager, completionListener);
     }
 

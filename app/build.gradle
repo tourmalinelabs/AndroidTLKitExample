@@ -14,8 +14,8 @@ android {
         minSdkVersion 16
         targetSdkVersion 25
 
-        versionCode 70
-        versionName "7.0.17032300"
+        versionCode 71
+        versionName "7.0.17032801"
     }
     buildTypes {
         release {
@@ -27,6 +27,6 @@ android {
 
 dependencies {
 
-    compile ("com.tourmalinelabs.android:TLKit:7.0.17032300@aar") { transitive=true }
+    compile ("com.tourmalinelabs.android:TLKit:7.0.17032801@aar") { transitive=true }
 
 }
