@@ -40,10 +40,8 @@ public class CKExampleApplication extends Application {
     public void StartEngine() {
         Engine.Init( this,
                      ApiKey,
-                     new DefaultAuthMgr( this,
-                                        ApiKey,
-                                        "example@tourmalinelabs.com",
-                                        "password"),
+                     new DefaultAuthMgr( "example@tourmalinelabs.com",
+                                         "password"),
                      new CompletionListener() {
                          @Override
                          public void OnSuccess() { Engine.Monitoring(true); }
