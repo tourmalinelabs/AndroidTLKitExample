@@ -137,34 +137,24 @@ is running.
 
 ```java
 LocalBroadcastManager mgr = LocalBroadcastManager.getInstance(this);
-mgr.registerReceiver(
-        new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent i) {
-                int state = i.getIntExtra("state", -1);
-                if (state == Engine.INIT_SUCCESS) {
-                    Log.w(TAG, "Registering listeners on eng start");
-                    tryToRestart = false;
-                } else if (state == Engine.INIT_FAILURE) {
-                    // Handle case of failure after the app is killed
-                    // and restarted by the OS
-                    String msg = i.getStringExtra("message");
-                    int reason = i.getIntExtra("reason", 0);
-                    if(!tryToRestart) {
-                        Log.i( TAG,"Engine is trying to restart.");
-                        tryToRestart = true;
-                        StartEngine( );
-                    } else {
-                        Log.e( TAG, "Engine start KO after trying"
-                               + " to restart -> nothing to do");
-                        tryToRestart = false;
+        mgr.registerReceiver(
+                new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent i) {
+                        int state = i.getIntExtra("state", Engine.INIT_SUCCESS);
+                        if( state == Engine.INIT_SUCCESS) {
+                            Log.w(TAG, "Registering listeners on eng start");
+                        } else if (state == Engine.INIT_REQUIRED) {
+                            Log.i( TAG,"Engine is trying to restart.");
+                            StartEngine( );
+                        } else if (state == Engine.INIT_FAILURE) {
+                            final String msg = i.getStringExtra("message");
+                            final int reason = i.getIntExtra("reason", 0);
+                            Log.w(TAG, "Eng start failed eng w/ reason " + reason + ": " + msg);
+                        }
                     }
-                    Log.w(TAG, "Eng start failed eng w/ reason "
-                            + reason + ": " + msg);
-                }
-            }
-        },
-        new IntentFilter(Engine.ACTION_LIFECYCLE));
+                },
+                new IntentFilter(Engine.ACTION_LIFECYCLE));
 ```
 
 ## Monitoring API
