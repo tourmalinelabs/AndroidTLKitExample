@@ -92,10 +92,8 @@ An example of initializing the engine with the `DefaultAuthMgr` is provided here
 ```java
 Engine.Init( getApplicationContext(),
              ApiKey,
-             new DefaultAuthMgr( this,
-                                ApiKey,
-                                "example@tourmalinelabs.com",
-                                "password"),
+             new DefaultAuthMgr( "example@tourmalinelabs.com",
+                                 "password"),
              new CompletionListener() {
                  @Override
                  public void OnSuccess() { Engine.Monitoring(true); }
