@@ -14,8 +14,8 @@ android {
         minSdkVersion 16
         targetSdkVersion 25
 
-        versionCode 72
-        versionName "7.1.17040502"
+        versionCode 73
+        versionName "7.2.17041300"
     }
     buildTypes {
         release {
