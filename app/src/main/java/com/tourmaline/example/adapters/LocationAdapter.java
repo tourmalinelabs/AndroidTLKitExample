@@ -18,46 +18,34 @@
  * application of any third party copyright notice to that third party's
  * code.
  ******************************************************************************/
-package com.tourmaline.example.helpers;
 
-import android.app.Activity;
-import android.app.ProgressDialog;
+package com.tourmaline.example.adapters;
 
-import com.tourmaline.example.R;
+import android.content.Context;
+import android.widget.ArrayAdapter;
 
-public class Progress {
+import java.util.HashMap;
+import java.util.List;
 
-    private Progress() {}
+public class LocationAdapter extends ArrayAdapter<String> {
 
-    private static ProgressDialog progress;
+    private final HashMap<String, Integer> map = new HashMap<>();
 
-    public static void show(final Activity activity) {
-        if(activity==null) return;
-        activity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if(progress!=null) {
-                    progress.dismiss();
-                    progress = null;
-                }
-                progress = new ProgressDialog(activity);
-                progress.setMessage(activity.getResources().getString(R.string.please_wait));
-                progress.show();
-            }
-        });
+    public LocationAdapter(Context context, int resource, List<String> objects) {
+        super(context, resource, objects);
+        for (int i = 0; i < objects.size(); ++i) {
+            map.put(objects.get(i), i);
+        }
     }
 
-    public static void dismiss(final Activity activity) {
-        if(activity==null) return;
-        activity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if(progress!=null) {
-                    progress.dismiss();
-                    progress = null;
-                }
-            }
-        });
+    @Override
+    public long getItemId(int position) {
+        final String item = getItem(position);
+        return map.get(item);
     }
 
+    @Override
+    public boolean hasStableIds() {
+        return true;
+    }
 }

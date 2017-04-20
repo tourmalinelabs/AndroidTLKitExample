@@ -1,6 +1,5 @@
-
 /* ******************************************************************************
- * Copyright 2016,2017 Tourmaline Labs, Inc. All rights reserved.
+ * Copyright 2017 Tourmaline Labs, Inc. All rights reserved.
  * Confidential & Proprietary - Tourmaline Labs, Inc. ("TLI")
  *
  * The party receiving this software directly from TLI (the "Recipient")
@@ -19,7 +18,6 @@
  * application of any third party copyright notice to that third party's
  * code.
  ******************************************************************************/
-
 package com.tourmaline.example.helpers;
 
 import android.content.Context;

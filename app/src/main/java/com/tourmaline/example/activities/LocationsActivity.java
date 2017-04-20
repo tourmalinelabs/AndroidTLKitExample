@@ -1,5 +1,5 @@
 /* ******************************************************************************
- * Copyright 2016 Tourmaline Labs, Inc. All rights reserved.
+ * Copyright 2017 Tourmaline Labs, Inc. All rights reserved.
  * Confidential & Proprietary - Tourmaline Labs, Inc. ("TLI")
  *
  * The party receiving this software directly from TLI (the "Recipient")
@@ -18,6 +18,7 @@
  * application of any third party copyright notice to that third party's
  * code.
  ******************************************************************************/
+
 package com.tourmaline.example.activities;
 
 import android.app.Activity;
@@ -32,8 +33,8 @@ import com.tourmaline.context.Location;
 import com.tourmaline.context.LocationListener;
 import com.tourmaline.context.LocationManager;
 import com.tourmaline.context.QueryHandler;
-import com.tourmaline.example.adapters.ListAdapter;
 import com.tourmaline.example.R;
+import com.tourmaline.example.adapters.LocationAdapter;
 import com.tourmaline.example.helpers.Progress;
 
 import java.util.ArrayList;
@@ -123,7 +124,7 @@ public class LocationsActivity extends Activity {
         calendar.add(Calendar.DATE, -7);
         final Date startTime = calendar.getTime();
 
-        LocationManager.QueryLocations(startTime.getTime(),endTime.getTime(), 20, queryHandler);
+        LocationManager.QueryLocations(startTime.getTime(),endTime.getTime(), 50, queryHandler);
     }
 
     private String locationDescription(final Location location) {
@@ -142,7 +143,7 @@ public class LocationsActivity extends Activity {
             Log.i(LOG_AREA, locationDescription);
             list.add(locationDescription);
         }
-        final ListAdapter adapter = new ListAdapter(LocationsActivity.this, android.R.layout.simple_list_item_1, list);
+        final LocationAdapter adapter = new LocationAdapter(LocationsActivity.this, android.R.layout.simple_list_item_1, list);
         runOnUiThread(new Runnable() {
             @Override
             public void run() {

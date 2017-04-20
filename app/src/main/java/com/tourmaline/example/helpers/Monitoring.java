@@ -1,5 +1,5 @@
 /* ******************************************************************************
- * Copyright 2016 Tourmaline Labs, Inc. All rights reserved.
+ * Copyright 2017 Tourmaline Labs, Inc. All rights reserved.
  * Confidential & Proprietary - Tourmaline Labs, Inc. ("TLI")
  *
  * The party receiving this software directly from TLI (the "Recipient")
@@ -18,33 +18,23 @@
  * application of any third party copyright notice to that third party's
  * code.
  ******************************************************************************/
-package com.tourmaline.example.adapters;
+package com.tourmaline.example.helpers;
 
 import android.content.Context;
-import android.widget.ArrayAdapter;
 
-import java.util.HashMap;
-import java.util.List;
+public class Monitoring {
 
-public class ListAdapter extends ArrayAdapter<String> {
+    private static final String MONITORING_STATE = "PrefMonitoringState";
 
-    private final HashMap<String, Integer> map = new HashMap<>();
+    public enum State { STOPPED, AUTOMATIC, MANUAL }
 
-    public ListAdapter(Context context, int resource, List<String> objects) {
-        super(context, resource, objects);
-        for (int i = 0; i < objects.size(); ++i) {
-            map.put(objects.get(i), i);
-        }
+    public static State getState(final Context context) {
+        final int state = Preferences.getInstance(context).getInt(MONITORING_STATE, State.STOPPED.ordinal());
+        return (State.values())[state];
     }
 
-    @Override
-    public long getItemId(int position) {
-        final String item = getItem(position);
-        return map.get(item);
+    public static void setState(final Context context, final State state) {
+        Preferences.getInstance(context).putInt(MONITORING_STATE, state.ordinal());
     }
 
-    @Override
-    public boolean hasStableIds() {
-        return true;
-    }
 }

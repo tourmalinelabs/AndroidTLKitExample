@@ -2,15 +2,33 @@
     <string name="app_name">TLExample</string>
 
     <string name="context_engine">TLKit</string>
-    <string name="monitoring">Monitoring</string>
+    <string name="tlkit_state">TLKit state:</string>
+    <string name="automatic_monitoring">Automatic Monitoring</string>
+    <string name="manual_monitoring">Manual Monitoring</string>
     <string name="not_monitoring">Not monitoring</string>
-    <string name="start">Start Monitoring</string>
-    <string name="stop">Stop Monitoring</string>
+    <string name="start_automatic_monitoring">Start Automatic Monitoring</string>
+    <string name="start_manual_monitoring">Start Manual Monitoring</string>
+    <string name="stop_monitoring">Stop Monitoring</string>
+    <string name="start_new_drive">Start a new drive</string>
+    <string name="stop_this_drive">Stop this drive</string>
     <string name="monitoring_apis">Monitoring API\'s</string>
     <string name="drives">Drives</string>
     <string name="locations">Locations</string>
     <string name="title_activity_drives">DrivesActivity</string>
     <string name="no_data">No data</string>
     <string name="title_activity_locations">LocationsActivity</string>
-    <string name="please_wait">Please wait...</string>
+    <string name="please_wait">Please wait&#8230;</string>
+    <string name="foreground_notification_content_text">Automatically detecting and logging your travels for driving score computation.</string>
+
+    <string name="drive_item_id">ID: %1$s</string>
+    <string name="drive_item_event_type">Event type: %1$s</string>
+    <string name="drive_item_state">State: %1$s</string>
+    <string name="drive_item_analysis_state">Analysis state: %1$s</string>
+    <string name="drive_item_distance">Distance: %1$s</string>
+    <string name="drive_item_start_time">Start time: %1$s</string>
+    <string name="drive_item_end_time">End time: %1$s</string>
+    <string name="drive_item_start_loc">Start loc: %1$s</string>
+    <string name="drive_item_end_loc">End loc: %1$s</string>
+    <string name="drive_item_start_add">Start add: %1$s</string>
+    <string name="drive_item_end_add">end add: %1$s</string>
 </resources>

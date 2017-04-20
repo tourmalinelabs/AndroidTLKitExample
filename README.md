@@ -13,7 +13,7 @@ a simple working example of how developers can use TLKit.
 # Integrating TLKit into a project
 
 ## 1 / Add the TLKit library 
-it consists to modify your `build.gradle` file as follows.
+Modify the project  `build.gradle` file as follows.
 
 ##### Add the TLKIT artifact's repository
 
@@ -31,11 +31,13 @@ dependencies {
     compile ("com.tourmalinelabs.android:TLKit:7.0.17032801@aar") { transitive=true }
 }
 ```
-*The transitive directive allows your project to automatically add the TLKIT own dependencies.*
+*The transitive directive allows your project to automatically include the TLKIT dependencies.*
 
 ## 2 / Add user permissions 
 
-Add the following the following permissions to the `Manifest.xml`.
+### Manifest Permissions
+
+Add the following the following permissions to the project `Manifest.xml`.
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -51,13 +53,19 @@ Add the following the following permissions to the `Manifest.xml`.
 </manifest>
 ```
 
+### Requesting permissions in app
+For Android versions 6 and above the application also needs to explicitly ask 
+for a set of permissions from the user. `Engine.MissingPermissions` provides a
+list of the required permissions that can be passed to 
+`ActivityCompat.requestPermissions`
+
 # Using TLKit
 
 The heart of the TLKit is the Context Engine. The engine needs to 
 be initialized with a registered user in order to use any of its 
 features. 
 
-## Registering and authenticating users.
+## Registering and authenticating users
 
 TLKit needs to be initialized in order to use any of its features and
 starting TLKit requires passing an `AuthMgr` instance to the engine
@@ -70,31 +78,112 @@ device. See the Data Services api on how to register and authenticate a
 user.
  
 For initial integration and evaluation purposes or for applications that do not 
-have a server component we the `DefaultAuthMgr` class which will provide 
+have a server component we use the `DefaultAuthMgr` class which will provide 
 registration and authentication services for the TL Server.
 
 Initialization with the `DefaultAuthMgr` is covered in the next section.
 
-## Initializing and destroying the engine
+## Engine is a foreground service
+The engine is an Android foreground service. All foreground services are 
+permanently displayed in the device notification area. For this reason it needs 
+to be initialized with a Notification object to inform the user about the 
+purpose of the application you are building. The notification is created with 
+the following code and must be given at the engine initialization:
 
-An example of initializing the engine with the `DefaultAuthMgr` is provided here:
-    
 ```java
-Engine.Init(getApplicationContext(),
-            ApiKey,
-            new DefaultAuthMgr("example@tourmalinelabs.com",
-                               "password"),
-            new CompletionListener() {
-                @Override
-                public void OnSuccess() { Engine.Monitoring(true); }
-                @Override
-                public void OnFail( int i, String s ) {}
+final Intent notificationIntent = new Intent(this, ExampleApplication.class);
+final PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, notificationIntent, 0);
+final Notification note = new Notification.Builder(this)
+                .setContentTitle(getText(R.string.app_name))
+                .setContentText(getText(R.string.foreground_notification_content_text))
+                .setSmallIcon(R.mipmap.ic_foreground_notification)
+                .setContentIntent(pendingIntent)
+                .build();
+```
+
+
+## Initializing and destroying the engine
+There is two manners of initializing the engine depending on your needs. An 
+automatic drive detection mode where the SDK will automatically detect and 
+monitor drives and a manual mode where the SDK will only monitor drives when
+explicitly told to by the application. 
+
+The first mode is useful in cases where the user is not interacting with the 
+application to start and end drives. While the second mode is useful when the 
+user will explicitly start and end drives in the application.
+
+### Initializing the engine for automatic drive monitoring  
+Once started in this mode the engine is able to automatically detect and record 
+all drives.
+
+```java
+Engine.InitAutomatic(getApplicationContext(),
+			  			 note,
+            			 ApiKey,
+            			 new DefaultAuthMgr("example@tourmalinelabs.com",
+                                        "password"),
+            			 new CompletionListener() {
+                			@Override
+                			public void OnSuccess() {}
+                			@Override
+                			public void OnFail( int i, String s ) {}
             });
 ```
 
+### Initializing the engine for manual drive monitoring
+Once started in this mode the engine is not able to automatically detect and 
+record all drives. It is the responsibility of the application to start and stop
+a drives. Several drives can be recorded at the same time.
+
+```java
+Engine.InitManual(getApplicationContext(),
+			  		  note,
+            		  ApiKey,
+            		  new DefaultAuthMgr("example@tourmalinelabs.com",
+                                      "password"),
+            		  new CompletionListener() {
+                			@Override
+                			public void OnSuccess() {}
+                			@Override
+                			public void OnFail( int i, String s ) {}
+            });
+```
+
+#### Starting a new drive
+
+In manual mode you can start a new drive by calling:
+
+```java
+final UUID uuid = ActivityManager.StartManualTrip();
+```
+
+When starting a new drive you receive an id in return. 
+
+#### Stoping a drive
+
+For stopping a drive you need to call StopManualTrip with the right id.
+
+```java
+ActivityManager.StopManualTrip(uuid);
+```
+
+Note that until a drive is explicitly stopped it will continue to record data.
+Even if the SDK is restarted, it will continue to record data for any trips that
+it was recording.
+
+#### Current manual drives
+
+The application can query the list of any drives being required as follows.
+
+```java
+final ArrayList<Drive> manualDrives = ActivityManager.ActiveManualDrives();
+```
+
+### Destroying the engine
+
 Once initialized there is no reason to destroy the `Engine` unless you need to 
-set a new `AuthMgr` for a different user or password. In those cases, the 
-engine can be destroyed as follows:
+set a new `AuthMgr` for a different user or need to switch between manual and 
+automatic modes. In those cases, the engine can be destroyed as follows:
 
 ```java
 Engine.Destroy(getApplicationContext(), 
@@ -109,7 +198,8 @@ Engine.Destroy(getApplicationContext(),
                     }
              });
 ```
-### Listening for Engine state changes
+
+## Listening for Engine state changes
 
 In addition to the completion listeners the engine also locally 
 broadcasts lifecycle events which can be subscribed to via the 
@@ -123,56 +213,39 @@ is running.
 
 ```java
 final LocalBroadcastManager mgr = LocalBroadcastManager.getInstance((getApplicationContext());
-        mgr.registerReceiver(
-                new BroadcastReceiver() {
-                    @Override
-                    public void onReceive(Context context, Intent i) {
-                        int state = i.getIntExtra("state", Engine.INIT_SUCCESS);
-                        if( state == Engine.INIT_SUCCESS) {
-                            Log.i(TAG, "ENGINE INIT SUCCESS");
-                        } else if (state == Engine.INIT_REQUIRED) {
-                            Log.i( TAG,"ENGINE INIT REQUIRED: Engine needs to restart in background...");
-                            Engine.Init( getApplicationContext(),
-                                         ApiKey,
-                                         new DefaultAuthMgr("example@tourmalinelabs.com", "password"),
-                                         new CompletionListener() {
-                                            @Override
-                                            public void OnSuccess() { Engine.Monitoring(true); }
-                                            @Override
-                                            public void OnFail( int i, String s ) {}
-                                         });
-                        } else if (state == Engine.INIT_FAILURE) {
-                            final String msg = i.getStringExtra("message");
-                            final int reason = i.getIntExtra("reason", 0);
-                            Log.e(TAG, "ENGINE INIT FAILURE" + reason + ": " + msg);
-                        }
-                    }
-                },
-                new IntentFilter(Engine.ACTION_LIFECYCLE));
+mgr.registerReceiver(
+        new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent i) {
+                int state = i.getIntExtra("state", Engine.INIT_SUCCESS);
+                if( state == Engine.INIT_SUCCESS) {
+                    Log.i(TAG, "ENGINE INIT SUCCESS");
+                } else if (state == Engine.INIT_REQUIRED) {
+                    Log.i( TAG,"ENGINE INIT REQUIRED: Engine needs to restart in background...");
+                    Engine.Init( getApplicationContext(),
+                    		     note,
+                                 ApiKey,
+                                 new DefaultAuthMgr("example@tourmalinelabs.com", "password"),
+                                 new CompletionListener() {
+                                    @Override
+                                    public void OnSuccess() {}
+                                    @Override
+                                    public void OnFail( int i, String s ) {}
+                                 });
+                } else if (state == Engine.INIT_FAILURE) {
+                    final String msg = i.getStringExtra("message");
+                    final int reason = i.getIntExtra("reason", 0);
+                    Log.e(TAG, "ENGINE INIT FAILURE" + reason + ": " + msg);
+                }
+            }
+        },
+        new IntentFilter(Engine.ACTION_LIFECYCLE));
     }
 ```
 
-## Monitoring API
-
-By default monitoring is disabled when the Engine is initialized. It needs to be
-explicitly enabled to track drives and locations. Enabling is done as follows:
-                    
-```java
-Engine.Monitoring( true );
-```
-
-Monitoring can be disabled at any time as follows
-
-```java
-Engine.Monitoring( false );
-```
-
-If monitoring is enabled at any point during a drive that drive will be recorded.
-
 ## Drive monitoring API
 
-Listeners can be registered to receive Drive events. Note: They 
-will only receive these events when monitoring is enabled. There is also an API for querying past drives.
+Listeners can be registered to receive Drive events.
 
 ###  Registering for drive events 
 
@@ -266,8 +339,6 @@ LocationListener listener = new LocationListener() {
 LocationManager.RegisterLocationListener(listener);
 ``` 
 
-Note: They will only receive these events when monitoring is enabled. There is also an API for querying past locations.
-
 A listener can be unregistered as follows:
 
 ```java
@@ -296,6 +367,4 @@ LocationManager.QueryLocations(0L, Long.MAX_VALUE, 20, new QueryHandler<ArrayLis
             }
         });
 ```
-
-Note: This will only include locations that were recorded when monitoring was enabled.
 

@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="5dp"
+    android:layout_marginRight="5dp"
+    android:orientation="vertical"
+    android:paddingTop="8dp"
+    android:paddingBottom="0dp">
+
+    <TextView
+        android:id="@+id/id_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="left"
+        android:lines="1"
+        android:ellipsize="middle"
+        android:textColor="@color/black" />
+
+    <TextView
+        android:id="@+id/event_type_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:lines="1"
+        android:ellipsize="middle"
+        android:textColor="@color/black"/>
+
+    <TextView
+        android:id="@+id/state_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:lines="1"
+        android:ellipsize="middle"
+        android:textColor="@color/black"/>
+
+    <TextView
+        android:id="@+id/analysis_state_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:lines="1"
+        android:ellipsize="middle"
+        android:textColor="@color/black"/>
+
+    <TextView
+        android:id="@+id/distance_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:lines="1"
+        android:ellipsize="middle"
+        android:textColor="@color/black"/>
+
+    <TextView
+        android:id="@+id/start_time_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:lines="1"
+        android:ellipsize="middle"
+        android:textColor="@color/black"/>
+
+    <TextView
+        android:id="@+id/end_time_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:lines="1"
+        android:ellipsize="middle"
+        android:textColor="@color/black"/>
+
+    <TextView
+        android:id="@+id/start_location_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:lines="1"
+        android:ellipsize="middle"
+        android:textColor="@color/black"/>
+
+    <TextView
+        android:id="@+id/end_location_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:lines="1"
+        android:ellipsize="middle"
+        android:textColor="@color/black"/>
+
+    <TextView
+        android:id="@+id/start_address_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:lines="1"
+        android:ellipsize="middle"
+        android:textColor="@color/black"/>
+
+    <TextView
+        android:id="@+id/end_address_time_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:lines="1"
+        android:ellipsize="middle"
+        android:textColor="@color/black"/>
+
+    <Button
+        android:id="@+id/stop_monitoring_button"
+        android:layout_width="wrap_content"
+        android:layout_height="26dip"
+        android:layout_marginRight="10dip"
+        android:layout_gravity="right"
+        android:paddingLeft="10dip"
+        android:paddingRight="10dip"
+        android:paddingTop="2dip"
+        android:paddingBottom="2dip"
+        android:text="@string/stop_this_drive"
+        android:textSize="12sp" />
+
+</LinearLayout>

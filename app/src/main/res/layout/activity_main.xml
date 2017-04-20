@@ -13,40 +13,67 @@
         android:id="@+id/ck_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dip"
-        android:layout_marginBottom="10dip"
         android:orientation="vertical">
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="20dip"
             android:gravity="center_horizontal"
+            android:textSize="20sp"
+            android:textColor="@color/black"
+            android:textStyle="bold"
             android:text="@string/context_engine" />
 
         <Button
-            android:id="@+id/start_button"
+            android:id="@+id/start_button_automatic"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/start" />
+            android:text="@string/start_automatic_monitoring" />
+
+        <Button
+            android:id="@+id/start_button_manual"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/start_manual_monitoring" />
 
         <Button
             android:id="@+id/stop_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/stop" />
+            android:text="@string/stop_monitoring" />
 
-        <TextView
-            android:id="@+id/engine_State"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="10dip"
-            android:gravity="center_horizontal" />
+            android:layout_marginTop="16dip"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:text="@string/tlkit_state" />
+
+            <TextView
+                android:id="@+id/engine_State"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:layout_gravity="center_vertical"
+                android:textColor="@color/red"
+                android:textSize="16sp"/>
+
+        </LinearLayout>
 
     </LinearLayout>
 
     <View
         android:layout_width="fill_parent"
         android:layout_height="0.5dip"
+        android:layout_marginTop="20dip"
         android:background="@android:color/black"
         android:minHeight="0.5dip" />
 
@@ -54,14 +81,18 @@
         android:id="@+id/api_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="10dip"
         android:visibility="gone"
         android:orientation="vertical">
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="16dip"
+            android:layout_marginBottom="20dip"
             android:gravity="center_horizontal"
+            android:textSize="20sp"
+            android:textColor="@color/black"
+            android:textStyle="bold"
             android:text="@string/monitoring_apis" />
 
         <Button
