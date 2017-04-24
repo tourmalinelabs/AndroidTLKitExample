@@ -103,7 +103,7 @@ final Notification note = new Notification.Builder(this)
 
 
 ## Initializing and destroying the engine
-There is two manners of initializing the engine depending on your needs. An 
+There are two manners of initializing the engine depending on your needs. An 
 automatic drive detection mode where the SDK will automatically detect and 
 monitor drives and a manual mode where the SDK will only monitor drives when
 explicitly told to by the application. 
