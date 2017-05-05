@@ -26,6 +26,7 @@ import android.text.format.DateUtils;
 import com.tourmaline.context.Drive;
 import com.tourmaline.context.Point;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.UUID;
@@ -52,15 +53,17 @@ public class DisplayableDrive {
         this.driveAnalysisState = drive.AnalysisStateStr();
         this.monitoring = monitoring;
         this.startTimestamp = drive.StartTime();
-        this.distance = drive.Distance()/1000.0f + " km";
+        final DecimalFormat numberFormat = new DecimalFormat("0.000");
+        this.distance = numberFormat.format(drive.Distance()/1000.0f) + " km";
         final int formatFlags = DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_ABBREV_MONTH| DateUtils.FORMAT_NO_YEAR;
         this.startTime = DateUtils.formatDateTime(context, drive.StartTime(), formatFlags);
         this.endTime = DateUtils.formatDateTime(context, drive.EndTime(), formatFlags);
         final ArrayList<Point> locations = drive.Locations();
         this.startLocation = this.endLocation = "empty";
+        final DecimalFormat positionFormat = new DecimalFormat("0.0000");
         if(locations!=null && locations.size()>1) {
-            this.startLocation = locations.get(0).Latitude() + ", " + locations.get(0).Longitude();
-            this.endLocation = locations.get(locations.size()-1).Latitude() + ", " + locations.get(locations.size()-1).Longitude();
+            this.startLocation = "(" + positionFormat.format(locations.get(0).Latitude()) + "|" + positionFormat.format(locations.get(0).Longitude()) + ")";
+            this.endLocation = "(" + positionFormat.format(locations.get(locations.size()-1).Latitude()) + "|" + positionFormat.format(locations.get(locations.size()-1).Longitude()) + ")";
         }
 
         this.startAddress = this.endAddress = "empty";
@@ -77,15 +80,15 @@ public class DisplayableDrive {
         return id;
     }
 
-    public String getActivityEventType() {
+    String getActivityEventType() {
         return activityEventType;
     }
 
-    public String getDriveState() {
+    String getDriveState() {
         return driveState;
     }
 
-    public String getDriveAnalysisState() {
+    String getDriveAnalysisState() {
         return driveAnalysisState;
     }
 
@@ -122,7 +125,7 @@ public class DisplayableDrive {
     }
 
     //Utility
-    public static final Comparator COMPARATOR_REVERSED = new Comparator<DisplayableDrive>() {
+    public static final Comparator<DisplayableDrive> COMPARATOR_REVERSED = new Comparator<DisplayableDrive>() {
         @Override
         public int compare(DisplayableDrive o1, DisplayableDrive o2) {
             return (int)(o2.startTimestamp-o1.startTimestamp);
