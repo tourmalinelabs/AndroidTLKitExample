@@ -21,31 +21,58 @@
 
 package com.tourmaline.example.adapters;
 
-import android.content.Context;
+import android.app.Activity;
+import android.support.annotation.NonNull;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.TextView;
 
-import java.util.HashMap;
+import com.tourmaline.example.R;
+
 import java.util.List;
 
-public class LocationAdapter extends ArrayAdapter<String> {
+public class LocationAdapter extends ArrayAdapter<DisplayableLocation> {
 
-    private final HashMap<String, Integer> map = new HashMap<>();
+    public LocationAdapter(Activity activity, List<DisplayableLocation> objects) {
+        super(activity, 0, objects);
+    }
 
-    public LocationAdapter(Context context, int resource, List<String> objects) {
-        super(context, resource, objects);
-        for (int i = 0; i < objects.size(); ++i) {
-            map.put(objects.get(i), i);
+    private class ViewHolder {
+        TextView textViewLocation;
+        TextView textViewTime;
+        TextView textViewAddress;
+        TextView textViewState;
+
+    }
+
+    @Override
+    public @NonNull
+    View getView(int position, View convertView, @NonNull ViewGroup parent) {
+        DisplayableLocation displayableLocation = getItem(position);
+        if (convertView == null) {
+            convertView = LayoutInflater.from(getContext()).inflate(R.layout.location_item, parent, false);
+            initLocationItemView(convertView);
         }
+        updateLocationItemView(convertView, displayableLocation);
+        return convertView;
     }
 
-    @Override
-    public long getItemId(int position) {
-        final String item = getItem(position);
-        return map.get(item);
+    private void initLocationItemView(final View convertView) {
+        final ViewHolder viewHolder = new ViewHolder();
+        viewHolder.textViewLocation = (TextView) convertView.findViewById(R.id.id_text_view_location);
+        viewHolder.textViewTime = (TextView) convertView.findViewById(R.id.id_text_view_time);
+        viewHolder.textViewAddress = (TextView) convertView.findViewById(R.id.id_text_view_address);
+        viewHolder.textViewState = (TextView) convertView.findViewById(R.id.id_text_view_state);
+        convertView.setTag(viewHolder);
     }
 
-    @Override
-    public boolean hasStableIds() {
-        return true;
+    private void updateLocationItemView(final View view, final DisplayableLocation displayableLocation) {
+        final ViewHolder viewHolder = (ViewHolder) view.getTag();
+        viewHolder.textViewLocation.setText(displayableLocation.getPosition());
+        viewHolder.textViewTime.setText(displayableLocation.getTime());
+        viewHolder.textViewAddress.setText(displayableLocation.getAddress());
+        viewHolder.textViewState.setText(displayableLocation.getState());
     }
 }

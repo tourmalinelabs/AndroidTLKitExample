@@ -23,17 +23,18 @@ package com.tourmaline.example.activities;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.tourmaline.context.Location;
 import com.tourmaline.context.LocationListener;
 import com.tourmaline.context.LocationManager;
 import com.tourmaline.context.QueryHandler;
 import com.tourmaline.example.R;
+import com.tourmaline.example.adapters.DisplayableLocation;
 import com.tourmaline.example.adapters.LocationAdapter;
 import com.tourmaline.example.helpers.Progress;
 
@@ -45,11 +46,13 @@ public class LocationsActivity extends Activity {
     private static final String LOG_AREA = "LocationsActivity";
 
     private LocationListener locationListener;
+    private LocationAdapter locationAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView( R.layout.activity_locations);
+        locationAdapter = new LocationAdapter(LocationsActivity.this, new ArrayList<DisplayableLocation>());
         updateLocations();
     }
 
@@ -71,7 +74,7 @@ public class LocationsActivity extends Activity {
                 @Override
                 public void OnLocationUpdated(Location location) {
                     Log.i(LOG_AREA, "Location Listener: new location");
-                    updateLocations();
+                    addLocation(location);
                 }
 
                 @Override
@@ -105,7 +108,7 @@ public class LocationsActivity extends Activity {
                     Log.i(LOG_AREA, locations.size() + " recorded locations: ");
                     showData(locations);
                 } else {
-                    Log.i(LOG_AREA, "No recorded drives:");
+                    Log.i(LOG_AREA, "No recorded locations:");
                     showNoData();
                 }
                 Progress.dismiss(LocationsActivity.this);
@@ -115,6 +118,7 @@ public class LocationsActivity extends Activity {
                 final String error = "Query failed with err: " + i + " -> " + s;
                 Log.e(LOG_AREA, error);
                 showError(error);
+                showNoData();
                 Progress.dismiss(LocationsActivity.this);
             }
         };
@@ -124,33 +128,25 @@ public class LocationsActivity extends Activity {
         calendar.add(Calendar.DATE, -7);
         final Date startTime = calendar.getTime();
 
-        LocationManager.QueryLocations(startTime.getTime(),endTime.getTime(), 50, queryHandler);
-    }
-
-    private String locationDescription(final Location location) {
-        final String latLng = "Location: " + location.lat + ", " + location.lng;
-        final int formatFlags = DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_ABBREV_MONTH| DateUtils.FORMAT_NO_YEAR;
-        final String time = "Time: " + DateUtils.formatDateTime(this, location.ts, formatFlags);
-        final String address = "Address: " + ((location.address!=null && location.address.length()>20)?location.address.substring(0, 20):"") + " ... ";
-        final String state = "State: " + location.StateStr();
-        return latLng + "\n" + time + "\n" + address + "\n" + state + "\n";
+        LocationManager.QueryLocations(startTime.getTime(), endTime.getTime(), 50, queryHandler);
     }
 
     private void showData(final ArrayList<Location> locations) {
-        final ArrayList<String> list = new ArrayList<>();
-        for (Location location : locations) {
-            final String locationDescription = locationDescription(location);
-            Log.i(LOG_AREA, locationDescription);
-            list.add(locationDescription);
-        }
-        final LocationAdapter adapter = new LocationAdapter(LocationsActivity.this, android.R.layout.simple_list_item_1, list);
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+
+                if(locations!=null) {
+                    locationAdapter.clear();
+                    for(Location location : locations) {
+                        locationAdapter.add(new DisplayableLocation(getApplicationContext(), location));
+                    }
+                    locationAdapter.sort(DisplayableLocation.COMPARATOR_REVERSED);
+                }
                 final ListView locationsListView = (ListView) findViewById(R.id.locations_list);
                 final TextView noDataTextView = (TextView) findViewById(R.id.no_data_text_view);
-                locationsListView.setAdapter(adapter);
-                noDataTextView.setVisibility(View.INVISIBLE);
+                locationsListView.setAdapter(locationAdapter);
+                noDataTextView.setVisibility(View.GONE);
                 locationsListView.setVisibility(View.VISIBLE);
             }
         });
@@ -164,7 +160,7 @@ public class LocationsActivity extends Activity {
                 final TextView noDataTextView = (TextView) findViewById(R.id.no_data_text_view);
                 noDataTextView.setText(getResources().getString(R.string.no_data));
                 noDataTextView.setVisibility(View.VISIBLE);
-                locationsListView.setVisibility(View.INVISIBLE);
+                locationsListView.setVisibility(View.GONE);
             }
         });
     }
@@ -173,11 +169,21 @@ public class LocationsActivity extends Activity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                final ListView locationsListView = (ListView) findViewById(R.id.locations_list);
-                final TextView noDataTextView = (TextView) findViewById(R.id.no_data_text_view);
-                noDataTextView.setText(error);
-                noDataTextView.setVisibility(View.VISIBLE);
-                locationsListView.setVisibility(View.INVISIBLE);
+                Toast.makeText(LocationsActivity.this, error, Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private void addLocation(final Location location) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if(location==null) return;
+                final DisplayableLocation displayableLocation = new DisplayableLocation(getApplicationContext(), location);
+                locationAdapter.add(displayableLocation);
+                locationAdapter.sort(DisplayableLocation.COMPARATOR_REVERSED);
+                locationAdapter.notifyDataSetChanged();
+                showData(null);
             }
         });
     }
