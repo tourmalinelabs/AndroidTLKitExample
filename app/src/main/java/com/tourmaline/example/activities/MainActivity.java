@@ -208,32 +208,39 @@ public class MainActivity extends Activity {
     }
 
     private void makeUIChangesOnEngineMonitoring(final Monitoring.State monitoring) {
-        switch (monitoring) {
-            case STOPPED: {
-                apiLayout.setVisibility(View.GONE);
-                engStateTextView.setText(getResources().getString(R.string.not_monitoring));
-                startAutomaticButton.setEnabled(true);
-                startManualButton.setEnabled(true);
-                stopButton.setEnabled(false);
-                break;
+        runOnUiThread( new Runnable() {
+            @Override
+            public void run() {
+                switch (monitoring) {
+                case STOPPED: {
+                    apiLayout.setVisibility(View.GONE);
+                    engStateTextView.setText(getResources().getString(R.string.not_monitoring));
+                    startAutomaticButton.setEnabled(true);
+                    startManualButton.setEnabled(true);
+                    stopButton.setEnabled(false);
+                    break;
+                }
+                case AUTOMATIC: {
+                    apiLayout.setVisibility(View.VISIBLE);
+                    engStateTextView.setText(getResources().getString(R.string.automatic_monitoring));
+                    startAutomaticButton.setEnabled(false);
+                    startManualButton.setEnabled(false);
+                    stopButton.setEnabled(true);
+                    break;
+                }
+                case MANUAL: {
+                    apiLayout.setVisibility(View.VISIBLE);
+                    engStateTextView.setText(getResources().getString(R.string.manual_monitoring));
+                    startAutomaticButton.setEnabled(false);
+                    startManualButton.setEnabled(false);
+                    stopButton.setEnabled(true);
+                    Toast.makeText(MainActivity.this,
+                                   "No drive will be detected until started by you! (click on DRIVES)", Toast.LENGTH_LONG).show();
+                    break;
+                }
+                }
             }
-            case AUTOMATIC: {
-                apiLayout.setVisibility(View.VISIBLE);
-                engStateTextView.setText(getResources().getString(R.string.automatic_monitoring));
-                startAutomaticButton.setEnabled(false);
-                startManualButton.setEnabled(false);
-                stopButton.setEnabled(true);
-                break;
-            }
-            case MANUAL: {
-                apiLayout.setVisibility(View.VISIBLE);
-                engStateTextView.setText(getResources().getString(R.string.manual_monitoring));
-                startAutomaticButton.setEnabled(false);
-                startManualButton.setEnabled(false);
-                stopButton.setEnabled(true);
-                Toast.makeText(this, "No drive will be detected until started by you! (click on DRIVES)", Toast.LENGTH_LONG).show();
-                break;
-            }
-        }
+        } );
+
     }
 }

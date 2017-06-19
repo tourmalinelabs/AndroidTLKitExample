@@ -62,26 +62,31 @@ list of the required permissions that can be passed to
 # Using TLKit
 
 The heart of the TLKit is the Context Engine. The engine needs to 
-be initialized with a registered user in order to use any of its 
-features. 
+be initialized with some user information and a drive detection mode in order to
+use any of its features. 
 
-## Registering and authenticating users
+## User information 
 
-TLKit needs to be initialized in order to use any of its features and
-starting TLKit requires passing an `AuthMgr` instance to the engine
-which handles authenticating against the TL Server.
+There are two types of user information that can be used to initialize the 
+engine: 
+  1. A SHA-256 hash of some user id. Currently only hashes of emails are allowed
+  but other TL approved ids could be used.
+  2. An application specific username and password. 
+  
+The first type of user info is appropriate for cases where the SDK is used only
+for data collection. The second type is useful in cases where the application 
+wants to access the per user information and provide password protected access
+to it to it's users. 
 
-In a production environment authentication should be done between the
-Application Server and the TLKit server. This will prevent the API
-key from being leaked out as part of SSL proxying attack on the mobile 
-device. See the Data Services api on how to register and authenticate a 
-user.
- 
-For initial integration and evaluation purposes or for applications that do not 
-have a server component we use the `DefaultAuthMgr` class which will provide 
-registration and authentication services for the TL Server.
+## Automatic and manual modes
 
-Initialization with the `DefaultAuthMgr` is covered in the next section.
+The engine can be initialized for either automatic drive detection where the SDK
+will automatically detect and monitor drives or a manual drive detection where 
+the SDK will only monitor drives when explicitly told to by the application.
+
+The first mode is useful in cases where the user is not interacting with the 
+application to start and end drives. While the second mode is useful when the 
+user will explicitly start and end drives in the application.
 
 ## Engine is a foreground service
 The engine is an Android foreground service. All foreground services are 
@@ -101,52 +106,24 @@ final Notification note = new Notification.Builder(this)
                 .build();
 ```
 
+## Example initialization with SHA-256 hash in automatic mode
+The below examples demonstrate initialization with just a SHA-256 hash. The 
+example application provides code for generating this hash.
 
-## Initializing and destroying the engine
-There are two manners of initializing the engine depending on your needs. An 
-automatic drive detection mode where the SDK will automatically detect and 
-monitor drives and a manual mode where the SDK will only monitor drives when
-explicitly told to by the application. 
-
-The first mode is useful in cases where the user is not interacting with the 
-application to start and end drives. While the second mode is useful when the 
-user will explicitly start and end drives in the application.
-
-### Initializing the engine for automatic drive monitoring  
 Once started in this mode the engine is able to automatically detect and record 
 all drives.
 
 ```java
-Engine.InitAutomatic(getApplicationContext(),
-			  			 note,
-            			 ApiKey,
-            			 new DefaultAuthMgr("example@tourmalinelabs.com",
-                                        "password"),
-            			 new CompletionListener() {
-                			@Override
-                			public void OnSuccess() {}
-                			@Override
-                			public void OnFail( int i, String s ) {}
-            });
-```
-
-### Initializing the engine for manual drive monitoring
-Once started in this mode the engine is not able to automatically detect and 
-record all drives. It is the responsibility of the application to start and stop
-a drives. Several drives can be recorded at the same time.
-
-```java
-Engine.InitManual(getApplicationContext(),
-			  		  note,
-            		  ApiKey,
-            		  new DefaultAuthMgr("example@tourmalinelabs.com",
-                                      "password"),
-            		  new CompletionListener() {
-                			@Override
-                			public void OnSuccess() {}
-                			@Override
-                			public void OnFail( int i, String s ) {}
-            });
+Engine.Init( getApplicationContext(),
+             ApiKey,
+             HashId( "androidexample@tourmalinelabs.com" ),
+             true, // set to `false` for manual mode
+             note,
+             new CompletionListener() {
+                @Override
+           		public void OnSuccess() {}
+                @Override
+                public void OnFail( int i, String s ) {} );
 ```
 
 #### Starting a new drive

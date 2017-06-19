@@ -34,34 +34,42 @@ import com.tourmaline.context.ActivityEvent;
 import com.tourmaline.context.ActivityListener;
 import com.tourmaline.context.ActivityManager;
 import com.tourmaline.context.CompletionListener;
-import com.tourmaline.context.DefaultAuthMgr;
 import com.tourmaline.context.Engine;
 import com.tourmaline.context.Location;
 import com.tourmaline.context.LocationListener;
 import com.tourmaline.context.LocationManager;
 import com.tourmaline.example.helpers.Monitoring;
 
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
 public class ExampleApplication extends Application {
     private static final String LOG_AREA = "ExampleApplication";
 
     private static final String ApiKey    = "bdf760a8dbf64e35832c47d8d8dffcc0";
-    private static final String user      = "example@tourmalinelabs.com";
-    private static final String password  = "password";
+    private static final String user      = "androidexample@tourmalinelabs.com";
 
     private ActivityListener activityListener;
     private LocationListener locationListener;
 
     // initEngine() is invoked in 2 cases:
-    // - When the Start Monitoring Button in the MainActivity is clicked for the first time,
-    // to launch the engine,
-    // - When Engine.INIT_REQUIRED is triggered by the LocalBroadcastManager. This situation
-    // corresponds to the case where the application has quit (force quit, device reboot...)
-    // and the Engine need to restart so it must be initialized again.
-    public void initEngine(final boolean automaticMonitoring, final CompletionListener completionListener) {
+    // - When the Start Monitoring Button in the MainActivity is clicked for the
+    // first time, to launch the engine,
+    // - When Engine.INIT_REQUIRED is triggered by the LocalBroadcastManager.
+    // This situation corresponds to the case where the application has quit
+    // (force quit, device reboot...) and the Engine need to restart so it must
+    // be initialized again.
+    public void initEngine(final boolean automaticMonitoring,
+                           final CompletionListener completionListener) {
 
-        //TLKit is a foreground service: here we set what is displayed into the device notification area
-        final Intent notificationIntent = new Intent(this, ExampleApplication.class);
-        final PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, notificationIntent, 0);
+        //TLKit is a foreground service: here we set what is displayed into the
+        // device notification area
+        final Intent notificationIntent =
+            new Intent(this, ExampleApplication.class);
+        final PendingIntent pendingIntent =
+            PendingIntent.getActivity(getApplicationContext(),
+                                      0, notificationIntent, 0);
         final Notification note = new Notification.Builder(this)
                 .setContentTitle(getText(R.string.app_name))
                 .setContentText(getText(R.string.foreground_notification_content_text))
@@ -69,15 +77,14 @@ public class ExampleApplication extends Application {
                 .setContentIntent(pendingIntent)
                 .build();
 
-        //Authentication
-        final Engine.AuthMgr authManager = new DefaultAuthMgr(user, password);
+        String hashedUserId = HashId( user );
+        Engine.Init( getApplicationContext(),
+                     ApiKey,
+                     hashedUserId,
+                     automaticMonitoring,
+                     note,
+                     completionListener );
 
-        // Engine Start
-        if(automaticMonitoring) {
-            Engine.InitAutomatic(getApplicationContext(), note, ApiKey, authManager, completionListener);
-        } else {
-            Engine.InitManual(getApplicationContext(), note, ApiKey, authManager, completionListener);
-        }
     }
 
     public void destroyEngine(final CompletionListener completionListener) {
@@ -102,8 +109,10 @@ public class ExampleApplication extends Application {
                             registerActivityListener();
                             registerLocationListener();
                         } else if (state == Engine.INIT_REQUIRED) {
-                            Log.i(LOG_AREA, "ENGINE INIT REQUIRED: Engine needs to restart in background...");
-                            final Monitoring.State monitoringState = Monitoring.getState(getApplicationContext());
+                            Log.i(LOG_AREA, "ENGINE INIT REQUIRED: Engine " +
+                                            "needs to restart in background...");
+                            final Monitoring.State monitoringState =
+                                Monitoring.getState(getApplicationContext());
                             switch (monitoringState) {
                                 case AUTOMATIC: initEngine(true, null); break;
                                 case MANUAL: initEngine(false, null); break;
@@ -112,7 +121,8 @@ public class ExampleApplication extends Application {
                         } else if (state == Engine.INIT_FAILURE) {
                             final String msg = i.getStringExtra("message");
                             final int reason = i.getIntExtra("reason", 0);
-                            Log.e(LOG_AREA, "ENGINE INIT FAILURE" + reason + ": " + msg);
+                            Log.e(LOG_AREA, "ENGINE INIT FAILURE" + reason +
+                                            ": " + msg);
                         }
                     }
                 },
@@ -159,6 +169,26 @@ public class ExampleApplication extends Application {
             }
         };
         LocationManager.RegisterLocationListener(locationListener);
+    }
+    /**
+     * Calculate the SHA256 digest of a string and return hexadecimal string
+     * representation of digest.
+     *
+     * @param str String to be digested.
+     * @return String digest as a hexadecimal string
+     */
+    private String HashId(String str){
+        MessageDigest digester=null;
+        try {
+            digester = MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException e) {
+            Log.e( LOG_AREA, "No SHA 256 wtf");
+        }
+        digester.reset();
+        byte[] dig = digester.digest(str.getBytes());
+        return String.format("%0" + (dig.length*2) + "X",
+                             new BigInteger( 1, dig) ).toUpperCase();
+
     }
 
 }
