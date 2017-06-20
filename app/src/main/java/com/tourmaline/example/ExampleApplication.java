@@ -113,9 +113,15 @@ public class ExampleApplication extends Application {
                                             "needs to restart in background...");
                             final Monitoring.State monitoringState =
                                 Monitoring.getState(getApplicationContext());
+                            final CompletionListener listener = new CompletionListener() {
+                                @Override
+                                public void OnSuccess() {}
+                                @Override
+                                public void OnFail(int i, String s) {}
+                            };
                             switch (monitoringState) {
-                                case AUTOMATIC: initEngine(true, null); break;
-                                case MANUAL: initEngine(false, null); break;
+                                case AUTOMATIC: initEngine(true, listener); break;
+                                case MANUAL: initEngine(false, listener); break;
                                 default: break;
                             }
                         } else if (state == Engine.INIT_FAILURE) {
@@ -178,17 +184,16 @@ public class ExampleApplication extends Application {
      * @return String digest as a hexadecimal string
      */
     private String HashId(String str){
-        MessageDigest digester=null;
+        String result = "";
         try {
-            digester = MessageDigest.getInstance("SHA-256");
+            final MessageDigest digester = MessageDigest.getInstance("SHA-256");
+            digester.reset();
+            byte[] dig = digester.digest(str.getBytes());
+            result = String.format("%0" + (dig.length*2) + "X", new BigInteger( 1, dig) ).toUpperCase();
         } catch (NoSuchAlgorithmException e) {
             Log.e( LOG_AREA, "No SHA 256 wtf");
         }
-        digester.reset();
-        byte[] dig = digester.digest(str.getBytes());
-        return String.format("%0" + (dig.length*2) + "X",
-                             new BigInteger( 1, dig) ).toUpperCase();
-
+        return  result;
     }
 
 }
