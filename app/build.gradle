@@ -15,7 +15,7 @@ android {
         targetSdkVersion 25
 
         versionCode 76
-        versionName "9.0.17061900@"
+        versionName "9.0.17061900"
     }
     buildTypes {
         release {
