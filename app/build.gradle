@@ -26,5 +26,5 @@ android {
 }
 
 dependencies {
-    compile ("com.tourmalinelabs.android:TLKit:9.1.17071700@aar") { transitive=true }
+    compile ("com.tourmalinelabs.android:TLKit:9.1.17072100@aar") { transitive=true }
 }
