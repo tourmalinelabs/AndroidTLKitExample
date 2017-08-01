@@ -65,7 +65,8 @@ public class DisplayableLocation {
     public static final Comparator<DisplayableLocation> COMPARATOR_REVERSED = new Comparator<DisplayableLocation>() {
         @Override
         public int compare(DisplayableLocation o1, DisplayableLocation o2) {
-            return (int)(o2.timestamp-o1.timestamp);
+            final long diff = o2.timestamp-o1.timestamp;
+            return (diff==0)?0:((diff>0)?1:-1);
         }
     };
 }

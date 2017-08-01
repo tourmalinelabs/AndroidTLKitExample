@@ -128,7 +128,8 @@ public class DisplayableDrive {
     public static final Comparator<DisplayableDrive> COMPARATOR_REVERSED = new Comparator<DisplayableDrive>() {
         @Override
         public int compare(DisplayableDrive o1, DisplayableDrive o2) {
-            return (int)(o2.startTimestamp-o1.startTimestamp);
+            final long diff = o2.startTimestamp-o1.startTimestamp;
+            return (diff==0)?0:((diff>0)?1:-1);
         }
     };
 }
