@@ -28,7 +28,7 @@ repositories {
 
 ```groovy
 dependencies {
-    compile ("com.tourmalinelabs.android:TLKit:9.1.17071700@aar") { transitive=true }
+    compile ("com.tourmalinelabs.android:TLKit:10.0.17081400@aar") { transitive=true }
 }
 ```
 *The transitive directive allows your project to automatically include the TLKIT dependencies.*

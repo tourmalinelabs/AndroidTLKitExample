@@ -15,7 +15,7 @@ android {
         targetSdkVersion 25
 
         versionCode 76
-        versionName "9.0.17062800"
+        versionName "10.0.17081400"
     }
     buildTypes {
         release {
@@ -26,5 +26,5 @@ android {
 }
 
 dependencies {
-    compile ("com.tourmalinelabs.android:TLKit:9.1.17072100@aar") { transitive=true }
+    compile ("com.tourmalinelabs.android:TLKit:10.0.17081400@aar") { transitive=true }
 }
