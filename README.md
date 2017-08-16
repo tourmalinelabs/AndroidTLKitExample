@@ -33,7 +33,15 @@ dependencies {
 ```
 *The transitive directive allows your project to automatically include the TLKIT dependencies.*
 
-## 2 / Add user permissions 
+## 2 / Obfuscation
+If you use proguard for obfuscating your Android code please add the following rules into your proguard-rules.pro file:
+
+```groovy
+-keep class com.tourmaline.** { *; }
+-dontwarn com.tourmaline.**
+```
+
+## 3 / Add user permissions 
 
 ### Manifest Permissions
 
