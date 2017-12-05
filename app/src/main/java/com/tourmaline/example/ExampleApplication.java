@@ -22,11 +22,15 @@ package com.tourmaline.example;
 
 import android.app.Application;
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Build;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
@@ -65,17 +69,22 @@ public class ExampleApplication extends Application {
 
         //TLKit is a foreground service: here we set what is displayed into the
         // device notification area
-        final Intent notificationIntent =
-            new Intent(this, ExampleApplication.class);
-        final PendingIntent pendingIntent =
-            PendingIntent.getActivity(getApplicationContext(),
-                                      0, notificationIntent, 0);
-        final Notification note = new Notification.Builder(this)
+
+        final String NOTIF_CHANNEL_ID = "background-run-notif-channel-id";
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            final NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            final NotificationChannel channel = new NotificationChannel(NOTIF_CHANNEL_ID, getText(R.string.foreground_notification_content_text), NotificationManager.IMPORTANCE_NONE);
+            channel.setShowBadge(false);
+            notificationManager.createNotificationChannel(channel);
+        }
+
+        final Notification note = new NotificationCompat.Builder(this, NOTIF_CHANNEL_ID)
                 .setContentTitle(getText(R.string.app_name))
                 .setContentText(getText(R.string.foreground_notification_content_text))
                 .setSmallIcon(R.mipmap.ic_foreground_notification)
-                .setContentIntent(pendingIntent)
+                .setPriority(NotificationCompat.PRIORITY_MIN)
                 .build();
+
 
         String hashedUserId = HashId( user );
         Engine.Init( getApplicationContext(),
@@ -104,31 +113,69 @@ public class ExampleApplication extends Application {
                     @Override
                     public void onReceive(Context context, Intent i) {
                         int state = i.getIntExtra("state", Engine.INIT_SUCCESS);
-                        if( state == Engine.INIT_SUCCESS) {
-                            Log.i(LOG_AREA, "ENGINE INIT SUCCESS");
-                            registerActivityListener();
-                            registerLocationListener();
-                        } else if (state == Engine.INIT_REQUIRED) {
-                            Log.i(LOG_AREA, "ENGINE INIT REQUIRED: Engine " +
-                                            "needs to restart in background...");
-                            final Monitoring.State monitoringState =
-                                Monitoring.getState(getApplicationContext());
-                            final CompletionListener listener = new CompletionListener() {
-                                @Override
-                                public void OnSuccess() {}
-                                @Override
-                                public void OnFail(int i, String s) {}
-                            };
-                            switch (monitoringState) {
-                                case AUTOMATIC: initEngine(true, listener); break;
-                                case MANUAL: initEngine(false, listener); break;
-                                default: break;
+                        switch (state) {
+                            case Engine.INIT_SUCCESS: {
+                                Log.i(LOG_AREA, "ENGINE INIT SUCCESS");
+                                registerActivityListener();
+                                registerLocationListener();
+                                break;
                             }
-                        } else if (state == Engine.INIT_FAILURE) {
-                            final String msg = i.getStringExtra("message");
-                            final int reason = i.getIntExtra("reason", 0);
-                            Log.e(LOG_AREA, "ENGINE INIT FAILURE" + reason +
-                                            ": " + msg);
+                            case Engine.INIT_REQUIRED: {
+                                Log.i(LOG_AREA, "ENGINE INIT REQUIRED: Engine " +
+                                        "needs to restart in background...");
+                                final Monitoring.State monitoringState =
+                                        Monitoring.getState(getApplicationContext());
+                                final CompletionListener listener = new CompletionListener() {
+                                    @Override
+                                    public void OnSuccess() {
+                                    }
+
+                                    @Override
+                                    public void OnFail(int i, String s) {
+                                    }
+                                };
+                                switch (monitoringState) {
+                                    case AUTOMATIC:
+                                        initEngine(true, listener);
+                                        break;
+                                    case MANUAL:
+                                        initEngine(false, listener);
+                                        break;
+                                    default:
+                                        break;
+                                }
+                                break;
+                            }
+                            case Engine.INIT_FAILURE: {
+                                final String msg = i.getStringExtra("message");
+                                final int reason = i.getIntExtra("reason", 0);
+                                Log.e(LOG_AREA, "ENGINE INIT FAILURE" + reason + ": " + msg);
+                                break;
+                            }
+                            case Engine.GPS_ENABLED: {
+                                Log.i(LOG_AREA, "GPS_ENABLED");
+                                break;
+                            }
+                            case Engine.GPS_DISABLED: {
+                                Log.i(LOG_AREA, "GPS_DISABLED");
+                                break;
+                            }
+                            case Engine.LOCATION_PERMISSION_GRANTED: {
+                                Log.i(LOG_AREA, "LOCATION_PERMISSION_GRANTED");
+                                break;
+                            }
+                            case Engine.LOCATION_PERMISSION_DENIED: {
+                                Log.i(LOG_AREA, "LOCATION_PERMISSION_DENIED");
+                                break;
+                            }
+                            case Engine.POWER_SAVE_MODE_DISABLED: {
+                                Log.i(LOG_AREA, "POWER_SAVE_MODE_DISABLED");
+                                break;
+                            }
+                            case Engine.POWER_SAVE_MODE_ENABLED: {
+                                Log.i(LOG_AREA, "POWER_SAVE_MODE_ENABLED");
+                                break;
+                            }
                         }
                     }
                 },

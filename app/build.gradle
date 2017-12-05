@@ -6,16 +6,16 @@ repositories {
 }
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.2"
+    compileSdkVersion 26
+    buildToolsVersion "26.0.2"
 
     defaultConfig {
         applicationId "com.tourmaline.ckexample"
         minSdkVersion 16
-        targetSdkVersion 25
+        targetSdkVersion 26
 
-        versionCode 78
-        versionName "10.1.17083000"
+        versionCode 79
+        versionName "10.3.17110301"
     }
     buildTypes {
         release {
@@ -26,5 +26,5 @@ android {
 }
 
 dependencies {
-    compile ("com.tourmalinelabs.android:TLKit:10.1.17083000@aar") { transitive=true }
+    implementation ("com.tourmalinelabs.android:TLKit:10.3.17110301@aar") { transitive=true }
 }
