@@ -42,6 +42,8 @@ import com.tourmaline.context.Engine;
 import com.tourmaline.context.Location;
 import com.tourmaline.context.LocationListener;
 import com.tourmaline.context.LocationManager;
+import com.tourmaline.context.TelematicsEvent;
+import com.tourmaline.context.TelematicsEventListener;
 import com.tourmaline.example.helpers.Monitoring;
 
 import java.math.BigInteger;
@@ -56,6 +58,7 @@ public class ExampleApplication extends Application {
 
     private ActivityListener activityListener;
     private LocationListener locationListener;
+    private TelematicsEventListener telematicsListener;
 
     // initEngine() is invoked in 2 cases:
     // - When the Start Monitoring Button in the MainActivity is clicked for the
@@ -118,6 +121,7 @@ public class ExampleApplication extends Application {
                                 Log.i(LOG_AREA, "ENGINE INIT SUCCESS");
                                 registerActivityListener();
                                 registerLocationListener();
+                                registerTelematicsListener();
                                 break;
                             }
                             case Engine.INIT_REQUIRED: {
@@ -203,6 +207,28 @@ public class ExampleApplication extends Application {
         ActivityManager.RegisterDriveListener(activityListener);
     }
 
+    //Telematics monitoring
+    private void registerTelematicsListener() {
+        telematicsListener = new TelematicsEventListener() {
+            @Override
+            public void OnEvent(TelematicsEvent e) {
+                Log.d( LOG_AREA, "Got telematics event: " + e.getTripId() +
+                        ", " + e.getTime() + ", " + e.getDuration() );
+            }
+
+            @Override
+            public void RegisterSucceeded() {
+                Log.d(LOG_AREA, "startTelematicsListener OK");
+            }
+
+            @Override
+            public void RegisterFailed(int i) {
+                Log.d(LOG_AREA, "startTelematicsListener KO: " + i);
+            }
+        };
+        ActivityManager.RegisterTelematicsEventListener(telematicsListener);
+    }
+
     //Location monitoring
     private void registerLocationListener() {
         locationListener = new LocationListener() {
@@ -223,6 +249,7 @@ public class ExampleApplication extends Application {
         };
         LocationManager.RegisterLocationListener(locationListener);
     }
+
     /**
      * Calculate the SHA256 digest of a string and return hexadecimal string
      * representation of digest.

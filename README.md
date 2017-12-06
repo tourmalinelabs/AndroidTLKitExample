@@ -1,18 +1,18 @@
 # TLKit
 
-This document contains a quick start guide for integrating TLKit 
+This document contains a quick start guide for integrating TLKit
 into your Android application. More detailed documentation can be found in the
-[Online documentation](http://docs.api.tl/android/) and 
+[Online documentation](http://docs.api.tl/android/) and
 [API docs](http://docs.api.tl/android/api/).
 
 # Sample Project
-Checkout our sample project 
+Checkout our sample project
 [AndroidTLKitExample](https://github.com/tourmalinelabs/AndroidTLKitExample) for
-a simple working example of how developers can use TLKit. 
+a simple working example of how developers can use TLKit.
 
 # Integrating TLKit into a project
 
-## 1 / Add the TLKit library 
+## 1 / Add the TLKit library
 Modify the project  `build.gradle` file as follows.
 
 ##### Add the TLKIT artifact's repository
@@ -33,7 +33,7 @@ dependencies {
 ```
 *The transitive directive allows your project to automatically include the TLKIT dependencies.*
 
-## 2 / Add user permissions 
+## 2 / Add user permissions
 
 ### Manifest Permissions
 
@@ -54,45 +54,45 @@ Add the following the following permissions to the project `Manifest.xml`.
 ```
 
 ### Requesting permissions in app
-For Android versions 6 and above the application also needs to explicitly ask 
+For Android versions 6 and above the application also needs to explicitly ask
 for a set of permissions from the user. `Engine.MissingPermissions` provides a
-list of the required permissions that can be passed to 
+list of the required permissions that can be passed to
 `ActivityCompat.requestPermissions`
 
 # Using TLKit
 
-The heart of the TLKit is the Context Engine. The engine needs to 
+The heart of the TLKit is the Context Engine. The engine needs to
 be initialized with some user information and a drive detection mode in order to
-use any of its features. 
+use any of its features.
 
-## User information 
+## User information
 
-There are two types of user information that can be used to initialize the 
-engine: 
+There are two types of user information that can be used to initialize the
+engine:
   1. A SHA-256 hash of some user id. Currently only hashes of emails are allowed
   but other TL approved ids could be used.
-  2. An application specific username and password. 
-  
+  2. An application specific username and password.
+
 The first type of user info is appropriate for cases where the SDK is used only
-for data collection. The second type is useful in cases where the application 
+for data collection. The second type is useful in cases where the application
 wants to access the per user information and provide password protected access
-to it to it's users. 
+to it to it's users.
 
 ## Automatic and manual modes
 
 The engine can be initialized for either automatic drive detection where the SDK
-will automatically detect and monitor drives or a manual drive detection where 
+will automatically detect and monitor drives or a manual drive detection where
 the SDK will only monitor drives when explicitly told to by the application.
 
-The first mode is useful in cases where the user is not interacting with the 
-application to start and end drives. While the second mode is useful when the 
+The first mode is useful in cases where the user is not interacting with the
+application to start and end drives. While the second mode is useful when the
 user will explicitly start and end drives in the application.
 
 ## Engine is a foreground service
-The engine is an Android foreground service. All foreground services are 
-permanently displayed in the device notification area. For this reason it needs 
-to be initialized with a Notification object to inform the user about the 
-purpose of the application you are building. The notification is created with 
+The engine is an Android foreground service. All foreground services are
+permanently displayed in the device notification area. For this reason it needs
+to be initialized with a Notification object to inform the user about the
+purpose of the application you are building. The notification is created with
 the following code and must be given at the engine initialization:
 
 ```java
@@ -112,10 +112,10 @@ final Notification note = new NotificationCompat.Builder(this, NOTIF_CHANNEL_ID)
 ```
 
 ## Example initialization with SHA-256 hash in automatic mode
-The below examples demonstrate initialization with just a SHA-256 hash. The 
+The below examples demonstrate initialization with just a SHA-256 hash. The
 example application provides code for generating this hash.
 
-Once started in this mode the engine is able to automatically detect and record 
+Once started in this mode the engine is able to automatically detect and record
 all drives.
 
 ```java
@@ -139,7 +139,7 @@ In manual mode you can start a new drive by calling:
 final UUID uuid = ActivityManager.StartManualTrip();
 ```
 
-When starting a new drive you receive an id in return. 
+When starting a new drive you receive an id in return.
 
 #### Stoping a drive
 
@@ -163,12 +163,12 @@ final ArrayList<Drive> manualDrives = ActivityManager.ActiveManualDrives();
 
 ### Destroying the engine
 
-Once initialized there is no reason to destroy the `Engine` unless you need to 
-set a new `AuthMgr` for a different user or need to switch between manual and 
+Once initialized there is no reason to destroy the `Engine` unless you need to
+set a new `AuthMgr` for a different user or need to switch between manual and
 automatic modes. In those cases, the engine can be destroyed as follows:
 
 ```java
-Engine.Destroy(getApplicationContext(), 
+Engine.Destroy(getApplicationContext(),
                new CompletionListener() {
                     @Override
                     public void OnSuccess() {
@@ -183,14 +183,14 @@ Engine.Destroy(getApplicationContext(),
 
 ## Listening for Engine state changes
 
-In addition to the completion listeners the engine also locally 
-broadcasts lifecycle events which can be subscribed to via the 
-`Engine.ACTION_LIFECYCLE` action as shown below. 
+In addition to the completion listeners the engine also locally
+broadcasts lifecycle events which can be subscribed to via the
+`Engine.ACTION_LIFECYCLE` action as shown below.
 
 It is recommended to use this intent to register any listeners with the engine.
-This is because in event of an unexpected application termination the lifecycle 
+This is because in event of an unexpected application termination the lifecycle
 registered listeners will be lost. When the engine automatically
-restarts with the app the intent will be the only notification that the engine 
+restarts with the app the intent will be the only notification that the engine
 is running.
 
 ```java
@@ -199,27 +199,71 @@ mgr.registerReceiver(
         new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent i) {
-                int state = i.getIntExtra("state", Engine.INIT_SUCCESS);
-                if( state == Engine.INIT_SUCCESS) {
-                    Log.i(TAG, "ENGINE INIT SUCCESS");
-                } else if (state == Engine.INIT_REQUIRED) {
-                    Log.i( TAG,"ENGINE INIT REQUIRED: Engine needs to restart in background...");
-                    Engine.Init( getApplicationContext(),
-                    		     note,
-                                 ApiKey,
-                                 new DefaultAuthMgr("example@tourmalinelabs.com", "password"),
-                                 new CompletionListener() {
-                                    @Override
-                                    public void OnSuccess() {}
-                                    @Override
-                                    public void OnFail( int i, String s ) {}
-                                 });
-                } else if (state == Engine.INIT_FAILURE) {
-                    final String msg = i.getStringExtra("message");
-                    final int reason = i.getIntExtra("reason", 0);
-                    Log.e(TAG, "ENGINE INIT FAILURE" + reason + ": " + msg);
-                }
-            }
+               int state = i.getIntExtra("state", Engine.INIT_SUCCESS);
+               switch (state) {
+                   case Engine.INIT_SUCCESS: {
+                       Log.i(LOG_AREA, "ENGINE INIT SUCCESS");
+                       registerActivityListener();
+                       registerLocationListener();
+                       break;
+                   }
+                   case Engine.INIT_REQUIRED: {
+                       Log.i(LOG_AREA, "ENGINE INIT REQUIRED: Engine " +
+                               "needs to restart in background...");
+                       final Monitoring.State monitoringState =
+                               Monitoring.getState(getApplicationContext());
+                       final CompletionListener listener = new CompletionListener() {
+                           @Override
+                           public void OnSuccess() {
+                           }
+
+                           @Override
+                           public void OnFail(int i, String s) {
+                           }
+                       };
+                       switch (monitoringState) {
+                           case AUTOMATIC:
+                               initEngine(true, listener);
+                               break;
+                           case MANUAL:
+                               initEngine(false, listener);
+                               break;
+                           default:
+                               break;
+                       }
+                       break;
+                   }
+                   case Engine.INIT_FAILURE: {
+                       final String msg = i.getStringExtra("message");
+                       final int reason = i.getIntExtra("reason", 0);
+                       Log.e(LOG_AREA, "ENGINE INIT FAILURE" + reason + ": " + msg);
+                       break;
+                   }
+                   case Engine.GPS_ENABLED: {
+                       Log.i(LOG_AREA, "GPS_ENABLED");
+                       break;
+                   }
+                   case Engine.GPS_DISABLED: {
+                       Log.i(LOG_AREA, "GPS_DISABLED");
+                       break;
+                   }
+                   case Engine.LOCATION_PERMISSION_GRANTED: {
+                       Log.i(LOG_AREA, "LOCATION_PERMISSION_GRANTED");
+                       break;
+                   }
+                   case Engine.LOCATION_PERMISSION_DENIED: {
+                       Log.i(LOG_AREA, "LOCATION_PERMISSION_DENIED");
+                       break;
+                   }
+                   case Engine.POWER_SAVE_MODE_DISABLED: {
+                       Log.i(LOG_AREA, "POWER_SAVE_MODE_DISABLED");
+                       break;
+                   }
+                   case Engine.POWER_SAVE_MODE_ENABLED: {
+                       Log.i(LOG_AREA, "POWER_SAVE_MODE_ENABLED");
+                       break;
+                   }
+               }
         },
         new IntentFilter(Engine.ACTION_LIFECYCLE));
     }
@@ -229,25 +273,25 @@ mgr.registerReceiver(
 
 Listeners can be registered to receive Drive events.
 
-###  Registering for drive events 
+###  Registering for drive events
 
 Register a drive listener can be done as follows:
 
 ```java
 ActivityListener listener = new ActivityListener() {
     @Override
-    public void OnEvent( ActivityEvent e ) { 
-    	Log.d("ActivityListener", "Activity event received: " + e ); 
+    public void OnEvent( ActivityEvent e ) {
+    	Log.d("ActivityListener", "Activity event received: " + e );
     }
 
     @Override
-    public void RegisterSucceeded() { 
-    	Log.d("ActivityListener", "registered!" ); 
+    public void RegisterSucceeded() {
+    	Log.d("ActivityListener", "registered!" );
     }
 
     @Override
-    public void RegisterFailed( int e ) { 
-    	Log.e("ActivityListener", "register failed w/reason " + reason + " :)" ); 
+    public void RegisterFailed( int e ) {
+    	Log.e("ActivityListener", "register failed w/reason " + reason + " :)" );
     }
 };
 ActivityManager.RegisterDriveListener(listener);
@@ -256,7 +300,7 @@ ActivityManager.RegisterDriveListener(listener);
 Multiple listeners can be registered via this API and all listeners will
 received the same events.
 
-_Note:_ Multiple events may be received for the same drive as the drive 
+_Note:_ Multiple events may be received for the same drive as the drive
 progresses and the drive processing updates the drive with more accurate
 map points.
 
@@ -270,7 +314,7 @@ ActivityManager.UnregisterDriveListener(listener);
 
 Some amount of drives are available for querying as follows.
 
-```java 
+```java
 ActivityManager.GetDrives( new Date(0L),
                            new Date(),
                            20,
@@ -292,14 +336,14 @@ ActivityManager.GetDrives( new Date(0L),
 
 ## Location monotioring API
 
-TLKit provides lower power location updates than traditional GPS 
+TLKit provides lower power location updates than traditional GPS
 only solutions.
-    
+
 ### Registering for location updates
 
 A listener can be registered as follows.
 
-```java 
+```java
 LocationListener listener = new LocationListener() {
     @Override
     public void OnLocationUpdated (Location l) {
@@ -319,7 +363,7 @@ LocationListener listener = new LocationListener() {
     }
 };
 LocationManager.RegisterLocationListener(listener);
-``` 
+```
 
 A listener can be unregistered as follows:
 
@@ -330,14 +374,14 @@ LocationManager.UnregisterLocationListener(listener);
 
 ### Querying location history
 
-TLKit provides the ability to query past locations via 
+TLKit provides the ability to query past locations via
 `QueryLocations` method of the Engine. These can be used as follows:
 
-```java 
+```java
 LocationManager.QueryLocations(0L, Long.MAX_VALUE, 20, new QueryHandler<ArrayList<Location>>() {
             @Override
             public void Result(ArrayList<Location> locations) {
-                Log.d( "QueryLocations", "Recorded locations" );
+              Log.d( "QueryLocations", "Recorded locations" );
         			for( Location location: locations ) {
             			Log.d("QueryLocations", location.toString() );
         			}
@@ -345,8 +389,58 @@ LocationManager.QueryLocations(0L, Long.MAX_VALUE, 20, new QueryHandler<ArrayLis
 
             @Override
             public void OnFail(int i, String s) {
-				Log.e("QueryLocations", "Query failed with err: " + i );
+				          Log.e("QueryLocations", "Query failed with err: " + i );
             }
         });
 ```
 
+## Telematics monotoring API
+
+TLKit provides the possibility to monitor telematics events occuring during a drive.
+
+### Registering for telematics updates
+
+A listener can be registered as follows.
+
+```java
+TelematicsEventListener telematicsListener = new TelematicsEventListener() {
+            @Override
+            public void OnEvent(TelematicsEvent e) {
+                Log.d( LOG_AREA, "Got telematics event: " + e.getTripId() +
+                        ", " + e.getTime() + ", " + e.getDuration() );
+            }
+
+            @Override
+            public void RegisterSucceeded() {
+                Log.d(LOG_AREA, "startTelematicsListener OK");
+            }
+
+            @Override
+            public void RegisterFailed(int i) {
+                Log.d(LOG_AREA, "startTelematicsListener KO: " + i);
+            }
+        };
+        ActivityManager.RegisterTelematicsEventListener(telematicsListener);
+```
+
+A listener can be unregistered as follows:
+
+```java
+ActivityManager.UregisterTelematicsEventListener(telematicsListener);
+```
+
+
+### Querying telematics history
+
+TLKit provides the ability to query past telematics via
+`GetTelematicsEvents` method of the Engine. These can be used as follows:
+
+```java
+ActivityManager.GetTelematicsEvents(new Date(-24*60*60*1000), new Date(), 1, 100, new PaginatedQueryHandler<ArrayList<TelematicsEvent>>() {
+            @Override
+            public void Result(final int currentPage, final int pageCount, final int resultCount, ArrayList<TelematicsEvent> res) {}
+
+            @Override
+            public void OnFail(int code, String message) {}
+        });
+```
