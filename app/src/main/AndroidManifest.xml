@@ -34,6 +34,11 @@
             android:label="@string/title_activity_locations" >
         </activity>
 
+        <activity
+            android:name="com.tourmaline.example.activities.TelematicsActivity"
+            android:label="@string/title_activity_telematics" >
+        </activity>
+
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />

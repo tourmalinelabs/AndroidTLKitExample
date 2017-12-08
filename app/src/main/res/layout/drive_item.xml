@@ -13,7 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="left"
-        android:lines="1"
+        android:singleLine="true"
         android:ellipsize="middle"
         android:textColor="@color/black" />
 
@@ -21,7 +21,7 @@
         android:id="@+id/event_type_text_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:lines="1"
+        android:singleLine="true"
         android:ellipsize="middle"
         android:textColor="@color/black"/>
 
@@ -29,7 +29,7 @@
         android:id="@+id/state_text_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:lines="1"
+        android:singleLine="true"
         android:ellipsize="middle"
         android:textColor="@color/black"/>
 
@@ -37,7 +37,7 @@
         android:id="@+id/analysis_state_text_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:lines="1"
+        android:singleLine="true"
         android:ellipsize="middle"
         android:textColor="@color/black"/>
 
@@ -45,7 +45,7 @@
         android:id="@+id/distance_text_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:lines="1"
+        android:singleLine="true"
         android:ellipsize="middle"
         android:textColor="@color/black"/>
 
@@ -53,7 +53,7 @@
         android:id="@+id/start_time_text_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:lines="1"
+        android:singleLine="true"
         android:ellipsize="middle"
         android:textColor="@color/black"/>
 
@@ -61,7 +61,7 @@
         android:id="@+id/end_time_text_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:lines="1"
+        android:singleLine="true"
         android:ellipsize="middle"
         android:textColor="@color/black"/>
 
@@ -69,7 +69,7 @@
         android:id="@+id/start_location_text_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:lines="1"
+        android:singleLine="true"
         android:ellipsize="middle"
         android:textColor="@color/black"/>
 
@@ -77,7 +77,7 @@
         android:id="@+id/end_location_text_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:lines="1"
+        android:singleLine="true"
         android:ellipsize="middle"
         android:textColor="@color/black"/>
 
@@ -85,7 +85,7 @@
         android:id="@+id/start_address_text_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:lines="1"
+        android:singleLine="true"
         android:ellipsize="middle"
         android:textColor="@color/black"/>
 
@@ -93,7 +93,7 @@
         android:id="@+id/end_address_time_text_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:lines="1"
+        android:singleLine="true"
         android:ellipsize="middle"
         android:textColor="@color/black"/>
 

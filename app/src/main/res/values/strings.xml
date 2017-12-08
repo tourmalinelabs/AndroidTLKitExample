@@ -14,9 +14,11 @@
     <string name="monitoring_apis">Monitoring API\'s</string>
     <string name="drives">Drives</string>
     <string name="locations">Locations</string>
+    <string name="telematics">Telematics</string>
     <string name="title_activity_drives">DrivesActivity</string>
     <string name="no_data">No data</string>
     <string name="title_activity_locations">LocationsActivity</string>
+    <string name="title_activity_telematics">telematicsActivity</string>
     <string name="please_wait">Please wait&#8230;</string>
     <string name="foreground_notification_content_text">Automatically detecting and logging your travels for driving score computation.</string>
 

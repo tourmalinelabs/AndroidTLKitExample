@@ -105,6 +105,15 @@ public class MainActivity extends Activity {
             }
         });
 
+        final Button telematicsButton = (Button) findViewById(R.id.telematics_button);
+        telematicsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                final Intent intent = new Intent(MainActivity.this, TelematicsActivity.class);
+                startActivity(intent);
+            }
+        });
+
         final Monitoring.State monitoring = Monitoring.getState(getApplicationContext());
         makeUIChangesOnEngineMonitoring(monitoring);
         tryToStartMonitoring(monitoring);
