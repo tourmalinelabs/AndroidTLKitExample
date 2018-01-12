@@ -269,6 +269,16 @@ mgr.registerReceiver(
     }
 ```
 
+The SDK will not be able to monitor your drives or your location updates in 3 cases:
+- the GPS is off or,
+- the location permissions are not granted or,
+- the power saving mode is enabled
+
+In order to handle it correctly in your specific integration we provide the following events: GPS_ENABLED, GPS_DISABLED, LOCATION_PERMISSION_GRANTED, LOCATION_PERMISSION_DENIED, POWER_SAVE_MODE_DISABLED, POWER_SAVE_MODE_ENABLED. Those events will only be received after the SDK starting.
+
+The transition from LOCATION_PERMISSION_DENIED to LOCATION_PERMISSION_GRANTED is the only transition which is not driven by an instantaneous Android OS callback. That's why you will observe a few minutes delay for this specific transition after restoring the location permission from the device settings.
+
+
 ## Drive monitoring API
 
 Listeners can be registered to receive Drive events.

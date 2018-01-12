@@ -22,12 +22,16 @@
 package com.tourmaline.example.activities;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -42,6 +46,7 @@ import com.tourmaline.context.CompletionListener;
 import com.tourmaline.context.Engine;
 import com.tourmaline.example.ExampleApplication;
 import com.tourmaline.example.R;
+import com.tourmaline.example.helpers.Alerts;
 import com.tourmaline.example.helpers.Monitoring;
 
 public class MainActivity extends Activity {
@@ -53,18 +58,28 @@ public class MainActivity extends Activity {
     private Button startAutomaticButton;
     private Button startManualButton;
     private Button stopButton;
+    private LinearLayout alertLayout;
+    private TextView alertGpsTextView;
+    private TextView alertPermissionTextView;
+    private TextView alertPowerTextView;
     private Monitoring.State targetMonitoringState;
+
+    private boolean paused = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView( R.layout.activity_main);
 
-        apiLayout = (LinearLayout) findViewById(R.id.api_layout);
-        engStateTextView = (TextView) findViewById(R.id.engine_State);
-        startAutomaticButton = (Button) findViewById(R.id.start_button_automatic);
-        startManualButton = (Button) findViewById(R.id.start_button_manual);
-        stopButton = (Button) findViewById(R.id.stop_button);
+        apiLayout = findViewById(R.id.api_layout);
+        engStateTextView = findViewById(R.id.engine_State);
+        startAutomaticButton = findViewById(R.id.start_button_automatic);
+        startManualButton = findViewById(R.id.start_button_manual);
+        stopButton = findViewById(R.id.stop_button);
+        alertLayout = findViewById(R.id.alert_layout);
+        alertGpsTextView = findViewById(R.id.alert_gps);
+        alertPermissionTextView = findViewById(R.id.alert_permission);
+        alertPowerTextView = findViewById(R.id.alert_power);
 
         startAutomaticButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -114,9 +129,30 @@ public class MainActivity extends Activity {
             }
         });
 
+        registerEngineAlerts();
+
         final Monitoring.State monitoring = Monitoring.getState(getApplicationContext());
         makeUIChangesOnEngineMonitoring(monitoring);
         tryToStartMonitoring(monitoring);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        paused = false;
+        setAlerts();
+    }
+
+    @Override
+    protected void onPause() {
+        paused = true;
+        super.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        unregisterEngineAlerts();
+        super.onDestroy();
     }
 
     private void tryToStartMonitoring(final Monitoring.State monitoring) {
@@ -206,13 +242,11 @@ public class MainActivity extends Activity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
         if(requestCode == PERMISSIONS_REQUEST) {
             if(permissionGranted(permissions, grantResults) ) {
-                Log.i( TAG, "All permissions granted");
-                startMonitoring(targetMonitoringState);
+                Log.i( TAG, "Permissions granted");
             } else {
-                Log.i( TAG, "permissions missing!");
-                stopMonitoring();
-                Toast.makeText(MainActivity.this, "Permissions missing!", Toast.LENGTH_LONG).show();
+                Log.i( TAG, "Permissions missing");
             }
+            startMonitoring(targetMonitoringState);
         }
     }
 
@@ -223,6 +257,7 @@ public class MainActivity extends Activity {
                 switch (monitoring) {
                 case STOPPED: {
                     apiLayout.setVisibility(View.GONE);
+                    alertLayout.setVisibility(View.GONE);
                     engStateTextView.setText(getResources().getString(R.string.not_monitoring));
                     startAutomaticButton.setEnabled(true);
                     startManualButton.setEnabled(true);
@@ -231,6 +266,7 @@ public class MainActivity extends Activity {
                 }
                 case AUTOMATIC: {
                     apiLayout.setVisibility(View.VISIBLE);
+                    alertLayout.setVisibility(View.VISIBLE);
                     engStateTextView.setText(getResources().getString(R.string.automatic_monitoring));
                     startAutomaticButton.setEnabled(false);
                     startManualButton.setEnabled(false);
@@ -239,6 +275,7 @@ public class MainActivity extends Activity {
                 }
                 case MANUAL: {
                     apiLayout.setVisibility(View.VISIBLE);
+                    alertLayout.setVisibility(View.VISIBLE);
                     engStateTextView.setText(getResources().getString(R.string.manual_monitoring));
                     startAutomaticButton.setEnabled(false);
                     startManualButton.setEnabled(false);
@@ -251,5 +288,73 @@ public class MainActivity extends Activity {
             }
         } );
 
+    }
+
+    private BroadcastReceiver receiver;
+
+    private void setAlerts() {
+        if(paused) return;
+        final ExampleApplication app = (ExampleApplication) getApplication();
+        showAlertGps(!app.isGpsEnable());
+        showAlertPermision(!app.isLocationPermissionGranted());
+        showAlertPower(app.isPowerSavingEnable());
+    }
+
+    private void registerEngineAlerts() {
+        final LocalBroadcastManager mgr = LocalBroadcastManager.getInstance(this);
+        receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent i) {
+                int state = i.getIntExtra("state", Engine.INIT_SUCCESS);
+                switch (state) {
+                    case Engine.GPS_ENABLED:
+                    case Engine.GPS_DISABLED:
+                    case Engine.LOCATION_PERMISSION_GRANTED:
+                    case Engine.LOCATION_PERMISSION_DENIED:
+                    case Engine.POWER_SAVE_MODE_DISABLED:
+                    case Engine.POWER_SAVE_MODE_ENABLED: { setAlerts();  break; }
+                    default: break;
+                }
+                setAlerts();
+            }
+        };
+        mgr.registerReceiver(receiver, new IntentFilter(Engine.ACTION_LIFECYCLE));
+    }
+
+    private void unregisterEngineAlerts() {
+        if(receiver!=null) {
+            final LocalBroadcastManager mgr = LocalBroadcastManager.getInstance(this);
+            mgr.unregisterReceiver(receiver);
+        }
+    }
+
+    private void showAlertGps(boolean show) {
+        if(show) {
+            alertGpsTextView.setText("GPS *** OFF");
+            alertGpsTextView.setTextColor(getResources().getColor(R.color.red));
+        } else {
+            alertGpsTextView.setText("GPS *** ON");
+            alertGpsTextView.setTextColor(getResources().getColor(R.color.blue));
+        }
+    }
+
+    private void showAlertPermision(boolean show) {
+        if(show) {
+            alertPermissionTextView.setText("Location permission *** OFF");
+            alertPermissionTextView.setTextColor(getResources().getColor(R.color.red));
+        } else {
+            alertPermissionTextView.setText("Location permission *** ON");
+            alertPermissionTextView.setTextColor(getResources().getColor(R.color.blue));
+        }
+    }
+
+    private void showAlertPower(boolean show) {
+        if(show) {
+            alertPowerTextView.setText("Power saving mode *** ON");
+            alertPowerTextView.setTextColor(getResources().getColor(R.color.red));
+        } else {
+            alertPowerTextView.setText("Power saving mode *** OFF");
+            alertPowerTextView.setTextColor(getResources().getColor(R.color.blue));
+        }
     }
 }
