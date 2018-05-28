@@ -46,7 +46,6 @@ import com.tourmaline.context.CompletionListener;
 import com.tourmaline.context.Engine;
 import com.tourmaline.example.ExampleApplication;
 import com.tourmaline.example.R;
-import com.tourmaline.example.helpers.Alerts;
 import com.tourmaline.example.helpers.Monitoring;
 
 public class MainActivity extends Activity {
@@ -60,8 +59,9 @@ public class MainActivity extends Activity {
     private Button stopButton;
     private LinearLayout alertLayout;
     private TextView alertGpsTextView;
-    private TextView alertPermissionTextView;
+    private TextView alertLocationTextView;
     private TextView alertPowerTextView;
+    private TextView alertSdkUpToDateTextView;
     private Monitoring.State targetMonitoringState;
 
     private boolean paused = true;
@@ -78,9 +78,9 @@ public class MainActivity extends Activity {
         stopButton = findViewById(R.id.stop_button);
         alertLayout = findViewById(R.id.alert_layout);
         alertGpsTextView = findViewById(R.id.alert_gps);
-        alertPermissionTextView = findViewById(R.id.alert_permission);
+        alertLocationTextView = findViewById(R.id.alert_location);
         alertPowerTextView = findViewById(R.id.alert_power);
-
+        alertSdkUpToDateTextView = findViewById(R.id.alert_sdk);
         startAutomaticButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -102,7 +102,7 @@ public class MainActivity extends Activity {
             }
         });
 
-        final Button locationsButton = (Button) findViewById(R.id.locations_button);
+        final Button locationsButton = findViewById(R.id.locations_button);
         locationsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -111,7 +111,7 @@ public class MainActivity extends Activity {
             }
         });
 
-        final Button drivesButton = (Button) findViewById(R.id.drives_button);
+        final Button drivesButton = findViewById(R.id.drives_button);
         drivesButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -120,7 +120,7 @@ public class MainActivity extends Activity {
             }
         });
 
-        final Button telematicsButton = (Button) findViewById(R.id.telematics_button);
+        final Button telematicsButton = findViewById(R.id.telematics_button);
         telematicsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -296,8 +296,9 @@ public class MainActivity extends Activity {
         if(paused) return;
         final ExampleApplication app = (ExampleApplication) getApplication();
         showAlertGps(!app.isGpsEnable());
-        showAlertPermision(!app.isLocationPermissionGranted());
+        showAlertLocation(!app.isLocationPermissionGranted());
         showAlertPower(app.isPowerSavingEnable());
+        showAlertSdkUpToDate(!app.isSdkUpToDate());
     }
 
     private void registerEngineAlerts() {
@@ -312,7 +313,11 @@ public class MainActivity extends Activity {
                     case Engine.LOCATION_PERMISSION_GRANTED:
                     case Engine.LOCATION_PERMISSION_DENIED:
                     case Engine.POWER_SAVE_MODE_DISABLED:
-                    case Engine.POWER_SAVE_MODE_ENABLED: { setAlerts();  break; }
+                    case Engine.POWER_SAVE_MODE_ENABLED:
+                    case Engine.SDK_UP_TO_DATE:
+                    case Engine.SDK_UPDATE_AVAILABLE:
+                    case Engine.SDK_UPDATE_MANDATORY:
+                        { setAlerts();  break; }
                     default: break;
                 }
                 setAlerts();
@@ -338,13 +343,13 @@ public class MainActivity extends Activity {
         }
     }
 
-    private void showAlertPermision(boolean show) {
+    private void showAlertLocation(boolean show) {
         if(show) {
-            alertPermissionTextView.setText("Location permission *** OFF");
-            alertPermissionTextView.setTextColor(getResources().getColor(R.color.red));
+            alertLocationTextView.setText("Location permission *** OFF");
+            alertLocationTextView.setTextColor(getResources().getColor(R.color.red));
         } else {
-            alertPermissionTextView.setText("Location permission *** ON");
-            alertPermissionTextView.setTextColor(getResources().getColor(R.color.blue));
+            alertLocationTextView.setText("Location permission *** ON");
+            alertLocationTextView.setTextColor(getResources().getColor(R.color.blue));
         }
     }
 
@@ -355,6 +360,16 @@ public class MainActivity extends Activity {
         } else {
             alertPowerTextView.setText("Power saving mode *** OFF");
             alertPowerTextView.setTextColor(getResources().getColor(R.color.blue));
+        }
+    }
+
+    private void showAlertSdkUpToDate(boolean show) {
+        if(show) {
+            alertSdkUpToDateTextView.setText("SDK up to date *** NO");
+            alertSdkUpToDateTextView.setTextColor(getResources().getColor(R.color.red));
+        } else {
+            alertSdkUpToDateTextView.setText("SDK up to date *** YES");
+            alertSdkUpToDateTextView.setTextColor(getResources().getColor(R.color.blue));
         }
     }
 }

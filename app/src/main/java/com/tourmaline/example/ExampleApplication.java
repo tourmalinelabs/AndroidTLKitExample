@@ -24,13 +24,10 @@ import android.app.Application;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -53,7 +50,6 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import static android.support.v4.app.NotificationCompat.VISIBILITY_SECRET;
 
 public class ExampleApplication extends Application {
     private static final String LOG_AREA = "ExampleApplication";
@@ -77,6 +73,11 @@ public class ExampleApplication extends Application {
     public boolean isPowerSavingEnable() {
         return powerSavingEnable;
     }
+    private boolean sdkUpToDate=true;
+    public boolean isSdkUpToDate() {
+        return sdkUpToDate;
+    }
+
 
     // initEngine() is invoked in 2 cases:
     // - When the Start Monitoring Button in the MainActivity is clicked for the
@@ -96,7 +97,9 @@ public class ExampleApplication extends Application {
             final NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
             final NotificationChannel channel = new NotificationChannel(NOTIF_CHANNEL_ID, getText(R.string.foreground_notification_content_text), NotificationManager.IMPORTANCE_NONE);
             channel.setShowBadge(false);
-            notificationManager.createNotificationChannel(channel);
+            if(notificationManager!=null) {
+                notificationManager.createNotificationChannel(channel);
+            }
         }
 
         final Notification note = new NotificationCompat.Builder(this, NOTIF_CHANNEL_ID)
@@ -118,6 +121,18 @@ public class ExampleApplication extends Application {
     }
 
     public void destroyEngine(final CompletionListener completionListener) {
+        if(activityListener!=null)  {
+            ActivityManager.UnregisterDriveListener(activityListener);
+            activityListener = null;
+        }
+        if(telematicsListener!=null)  {
+            ActivityManager.UnregisterTelematicsEventListener(telematicsListener);
+            telematicsListener = null;
+        }
+        if(locationListener!=null)  {
+            LocationManager.UnregisterLocationListener(locationListener);
+            locationListener = null;
+        }
         Engine.Destroy(getApplicationContext(), completionListener);
     }
 
@@ -212,6 +227,21 @@ public class ExampleApplication extends Application {
                                 Log.i(LOG_AREA, "POWER_SAVE_MODE_ENABLED");
                                 powerSavingEnable = true;
                                 Alerts.show(getApplicationContext(), Alerts.Type.POWER);
+                                break;
+                            }
+                            case Engine.SDK_UP_TO_DATE: {
+                                Log.i(LOG_AREA, "SDK_UP_TO_DATE");
+                                sdkUpToDate = true;
+                                break;
+                            }
+                            case Engine.SDK_UPDATE_MANDATORY: {
+                                Log.i(LOG_AREA, "SDK_UPDATE_MANDATORY");
+                                sdkUpToDate = false;
+                                break;
+                            }
+                            case Engine.SDK_UPDATE_AVAILABLE: {
+                                Log.i(LOG_AREA, "SDK_UPDATE_AVAILABLE");
+                                sdkUpToDate = false;
                                 break;
                             }
                         }

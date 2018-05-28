@@ -28,7 +28,7 @@ repositories {
 
 ```groovy
 dependencies {
-    compile ("com.tourmalinelabs.android:TLKit:11.0.17121500@aar") { transitive=true }
+    compile ("com.tourmalinelabs.android:TLKit:11.6.18052500@aar") { transitive=true }
 }
 ```
 *The transitive directive allows your project to automatically include the TLKIT dependencies.*
@@ -263,6 +263,18 @@ mgr.registerReceiver(
                        Log.i(LOG_AREA, "POWER_SAVE_MODE_ENABLED");
                        break;
                    }
+                   case Engine.SDK_UP_TO_DATE: {
+                       Log.i(LOG_AREA, "SDK_UP_TO_DATE");
+                       break;
+                   }
+                   case Engine.SDK_UPDATE_MANDATORY: {
+                       Log.i(LOG_AREA, "SDK_UPDATE_MANDATORY");
+                       break;
+                   }
+                   case Engine.SDK_UPDATE_AVAILABLE: {
+                     Log.i(LOG_AREA, "SDK_UPDATE_AVAILABLE");
+                     break;
+                  }
                }
         },
         new IntentFilter(Engine.ACTION_LIFECYCLE));
@@ -278,6 +290,7 @@ In order to handle it correctly in your specific integration we provide the foll
 
 The transition from LOCATION_PERMISSION_DENIED to LOCATION_PERMISSION_GRANTED is the only transition which is not driven by an instantaneous Android OS callback. That's why you will observe a few minutes delay for this specific transition after restoring the location permission from the device settings.
 
+SDK_UP_TO_DATE, SDK_UPDATE_MANDATORY, SDK_UPDATE_AVAILABLE will inform the broadcast receiver about the update status of the running TLKit compared to the last releases.
 
 ## Drive monitoring API
 
