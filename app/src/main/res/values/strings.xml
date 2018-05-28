@@ -20,7 +20,6 @@
     <string name="title_activity_locations">LocationsActivity</string>
     <string name="title_activity_telematics">telematicsActivity</string>
     <string name="please_wait">Please wait&#8230;</string>
-    <string name="foreground_notification_content_text">Automatically detecting and logging your travels for driving score computation.</string>
 
     <string name="drive_item_id">ID: %1$s</string>
     <string name="drive_item_event_type">Event type: %1$s</string>
@@ -33,4 +32,15 @@
     <string name="drive_item_end_loc">End loc: %1$s</string>
     <string name="drive_item_start_add">Start add: %1$s</string>
     <string name="drive_item_end_add">end add: %1$s</string>
+
+    <!--Notifications-->
+    <string name="foreground_notification_content_text">Automatically detecting and logging your travels for driving score computation.</string>
+    <string name="foreground_notification_channel_title">Background run</string>
+    <string name="gps_notif_title">GPS off</string>
+    <string name="gps_notif_text">can\'t work.</string>
+    <string name="permission_notif_title">Location Permission denied</string>
+    <string name="permission_notif_text">can\'t work.</string>
+    <string name="power_notif_title">Power saving mode activated</string>
+    <string name="power_notif_text">can\'t work efficiently.</string>
+
 </resources>

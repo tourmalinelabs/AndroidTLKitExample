@@ -29,6 +29,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -44,11 +46,14 @@ import com.tourmaline.context.LocationListener;
 import com.tourmaline.context.LocationManager;
 import com.tourmaline.context.TelematicsEvent;
 import com.tourmaline.context.TelematicsEventListener;
+import com.tourmaline.example.helpers.Alerts;
 import com.tourmaline.example.helpers.Monitoring;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+
+import static android.support.v4.app.NotificationCompat.VISIBILITY_SECRET;
 
 public class ExampleApplication extends Application {
     private static final String LOG_AREA = "ExampleApplication";
@@ -59,6 +64,19 @@ public class ExampleApplication extends Application {
     private ActivityListener activityListener;
     private LocationListener locationListener;
     private TelematicsEventListener telematicsListener;
+
+    private boolean gpsEnable=true;
+    public boolean isGpsEnable() {
+        return gpsEnable;
+    }
+    private boolean locationPermissionGranted=true;
+    public boolean isLocationPermissionGranted() {
+        return locationPermissionGranted;
+    }
+    private boolean powerSavingEnable=false;
+    public boolean isPowerSavingEnable() {
+        return powerSavingEnable;
+    }
 
     // initEngine() is invoked in 2 cases:
     // - When the Start Monitoring Button in the MainActivity is clicked for the
@@ -158,26 +176,42 @@ public class ExampleApplication extends Application {
                             }
                             case Engine.GPS_ENABLED: {
                                 Log.i(LOG_AREA, "GPS_ENABLED");
+                                gpsEnable = true;
+                                Alerts.hide(getApplicationContext(), Alerts.Type.GPS);
                                 break;
                             }
                             case Engine.GPS_DISABLED: {
                                 Log.i(LOG_AREA, "GPS_DISABLED");
+                                gpsEnable = false;
+                                Alerts.show(getApplicationContext(), Alerts.Type.GPS);
                                 break;
                             }
                             case Engine.LOCATION_PERMISSION_GRANTED: {
                                 Log.i(LOG_AREA, "LOCATION_PERMISSION_GRANTED");
+                                //since there is no Android callback for this state, the SDK will be informed
+                                //only when it needs to get a new location, then it can take several
+                                //minutes for the notification to disappear
+                                locationPermissionGranted = true;
+                                Alerts.hide(getApplicationContext(), Alerts.Type.PERMISSION);
                                 break;
                             }
                             case Engine.LOCATION_PERMISSION_DENIED: {
                                 Log.i(LOG_AREA, "LOCATION_PERMISSION_DENIED");
+                                //In that case Android OS restart the app automatically
+                                locationPermissionGranted = false;
+                                Alerts.show(getApplicationContext(), Alerts.Type.PERMISSION);
                                 break;
                             }
                             case Engine.POWER_SAVE_MODE_DISABLED: {
                                 Log.i(LOG_AREA, "POWER_SAVE_MODE_DISABLED");
+                                powerSavingEnable=false;
+                                Alerts.hide(getApplicationContext(), Alerts.Type.POWER);
                                 break;
                             }
                             case Engine.POWER_SAVE_MODE_ENABLED: {
                                 Log.i(LOG_AREA, "POWER_SAVE_MODE_ENABLED");
+                                powerSavingEnable = true;
+                                Alerts.show(getApplicationContext(), Alerts.Type.POWER);
                                 break;
                             }
                         }
