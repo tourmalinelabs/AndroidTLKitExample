@@ -13,8 +13,8 @@ android {
         minSdkVersion 16
         targetSdkVersion 28
 
-        versionCode 86
-        versionName "12.0.18061200"
+        versionCode 87
+        versionName "12.0.18061800"
     }
     buildTypes {
         release {
@@ -26,7 +26,7 @@ android {
 
 dependencies {
     //TLKit
-    implementation("com.tourmalinelabs.android:TLKit:12.0.18061200@aar") {transitive=true}
+    implementation("com.tourmalinelabs.android:TLKit:12.0.18061800@aar") {transitive=true}
 
     //App UI
     implementation("com.android.support:appcompat-v7:27.1.1")
