@@ -30,7 +30,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.tourmaline.context.ActivityManager;
+import com.tourmaline.context.Drive;
 import com.tourmaline.context.PaginatedQueryHandler;
+import com.tourmaline.context.QueryHandler;
 import com.tourmaline.context.TelematicsEvent;
 import com.tourmaline.context.TelematicsEventListener;
 import com.tourmaline.example.R;
@@ -53,7 +55,7 @@ public class TelematicsActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView( R.layout.activity_telematics);
         telematicsAdapter = new TelematicsAdapter(TelematicsActivity.this, new ArrayList<DisplayableTelematics>());
-        updateLocations();
+        updateTelematics();
     }
 
     @Override
@@ -98,20 +100,46 @@ public class TelematicsActivity extends Activity {
         }
     }
 
-    private void updateLocations() {
+    private void updateTelematics() {
         Progress.show(this);
 
-        final PaginatedQueryHandler<ArrayList<TelematicsEvent>> handler = new PaginatedQueryHandler<ArrayList<TelematicsEvent>>() {
+        final Calendar calendar = Calendar.getInstance();
+        final Date endTime = calendar.getTime();
+        calendar.add(Calendar.DATE, -30);
+        final Date startTime = calendar.getTime();
+
+        ActivityManager.GetDrives(startTime, endTime, 1, new QueryHandler<ArrayList<Drive>>() {
             @Override
-            public void Result(final int currentPage, final int pageCount, final int resultCount, ArrayList<TelematicsEvent> events) {
-                if (events != null && !events.isEmpty()) {
-                    Log.i(LOG_AREA, events.size() + " recorded telematics: ");
-                    showData(events);
-                } else {
-                    Log.i(LOG_AREA, "No recorded telematics:");
+            public void Result(ArrayList<Drive> drives) {
+
+                if(drives.isEmpty()) {
                     showNoData();
+                    Progress.dismiss(TelematicsActivity.this);
+                } else {
+                    ActivityManager.GetTripTelematicsEvents(drives.get(0).Id().toString(), new QueryHandler<ArrayList<TelematicsEvent>>() {
+                        @Override
+                        public void Result(ArrayList<TelematicsEvent> events) {
+                            if (events != null && !events.isEmpty()) {
+                                Log.i(LOG_AREA, events.size() + " recorded telematics: ");
+                                showData(events);
+                            } else {
+                                Log.i(LOG_AREA, "No recorded telematics:");
+                                showNoData();
+                            }
+                            Progress.dismiss(TelematicsActivity.this);
+                        }
+
+                        @Override
+                        public void OnFail(int i, String s) {
+                            final String error = "Query failed with err: " + i + " -> " + s;
+                            Log.e(LOG_AREA, error);
+                            showError(error);
+                            showNoData();
+                            Progress.dismiss(TelematicsActivity.this);
+                        }
+                    });
+
                 }
-                Progress.dismiss(TelematicsActivity.this);
             }
 
             @Override
@@ -122,14 +150,8 @@ public class TelematicsActivity extends Activity {
                 showNoData();
                 Progress.dismiss(TelematicsActivity.this);
             }
-        };
+        });
 
-        final Calendar calendar = Calendar.getInstance();
-        final Date endTime = calendar.getTime();
-        calendar.add(Calendar.DATE, -7);
-        final Date startTime = calendar.getTime();
-
-        ActivityManager.GetTelematicsEvents(startTime, endTime, 1, 100, handler);
     }
 
     private void showData(final ArrayList<TelematicsEvent> events) {

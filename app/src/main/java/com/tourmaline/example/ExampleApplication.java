@@ -41,6 +41,7 @@ import com.tourmaline.context.Engine;
 import com.tourmaline.context.Location;
 import com.tourmaline.context.LocationListener;
 import com.tourmaline.context.LocationManager;
+import com.tourmaline.context.NotificationInfo;
 import com.tourmaline.context.TelematicsEvent;
 import com.tourmaline.context.TelematicsEventListener;
 import com.tourmaline.example.helpers.Alerts;
@@ -102,21 +103,18 @@ public class ExampleApplication extends Application {
             }
         }
 
-        final Notification note = new NotificationCompat.Builder(this, NOTIF_CHANNEL_ID)
-                .setContentTitle(getText(R.string.app_name))
-                .setContentText(getText(R.string.foreground_notification_content_text))
-                .setSmallIcon(R.mipmap.ic_foreground_notification)
-                .setPriority(NotificationCompat.PRIORITY_MIN)
-                .build();
-
+        NotificationInfo note = new NotificationInfo(NOTIF_CHANNEL_ID,
+                getString(R.string.app_name),
+                getString(R.string.foreground_notification_content_text),
+                R.mipmap.ic_foreground_notification);
 
         String hashedUserId = HashId( user );
-        Engine.Init( getApplicationContext(),
-                     ApiKey,
-                     hashedUserId,
-                     automaticMonitoring,
-                     note,
-                     completionListener );
+        Engine.Init(getApplicationContext(),
+                ApiKey,
+                hashedUserId,
+                automaticMonitoring? Engine.MonitoringMode.AUTOMATIC:Engine.MonitoringMode.MANUAL,
+                note,
+                completionListener);
 
     }
 
@@ -243,6 +241,10 @@ public class ExampleApplication extends Application {
                                 Log.i(LOG_AREA, "SDK_UPDATE_AVAILABLE");
                                 sdkUpToDate = false;
                                 break;
+                            }
+                            case Engine.SYNCHRONIZED: {
+                                //All records have been processed and sent to the backend
+                                Log.i(LOG_AREA, "SYNCHRONIZED");
                             }
                         }
                     }

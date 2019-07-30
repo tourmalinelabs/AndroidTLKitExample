@@ -15,6 +15,7 @@
     <string name="drives">Drives</string>
     <string name="locations">Locations</string>
     <string name="telematics">Telematics</string>
+    <string name="telematics_last_trip">Telematics (last trip)</string>
     <string name="title_activity_drives">DrivesActivity</string>
     <string name="no_data">No data</string>
     <string name="title_activity_locations">LocationsActivity</string>

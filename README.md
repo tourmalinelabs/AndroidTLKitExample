@@ -28,10 +28,9 @@ repositories {
 
 ```groovy
 dependencies {
-    compile ("com.tourmalinelabs.android:TLKit:12.0.18061800@aar") { transitive=true }
+    implementation("com.tourmalinelabs.android:TLKit:14.4.19072900@aar")
 }
 ```
-*The transitive directive allows your project to automatically include the TLKIT dependencies.*
 
 ## 2 / Add user permissions
 
@@ -40,13 +39,12 @@ The following permissions will be automatically imported into your project.
 ```xml
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
-    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION" />
 ```
 Also the SDK uses the following device features:
 ```xml
@@ -103,14 +101,15 @@ if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
     final NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
     final NotificationChannel channel = new NotificationChannel(NOTIF_CHANNEL_ID, getText(R.string.foreground_notification_content_text), NotificationManager.IMPORTANCE_NONE);
     channel.setShowBadge(false);
-    notificationManager.createNotificationChannel(channel);
+    if(notificationManager!=null) {
+        notificationManager.createNotificationChannel(channel);
+    }
 }
-final Notification note = new NotificationCompat.Builder(this, NOTIF_CHANNEL_ID)
-        .setContentTitle(getText(R.string.app_name))
-        .setContentText(getText(R.string.foreground_notification_content_text))
-        .setSmallIcon(R.mipmap.ic_foreground_notification)
-        .setPriority(NotificationCompat.PRIORITY_MIN)
-        .build();
+
+NotificationInfo note = new NotificationInfo(NOTIF_CHANNEL_ID,
+        getString(R.string.app_name),
+        getString(R.string.foreground_notification_content_text),
+        R.mipmap.ic_foreground_notification);
 ```
 
 ## Example initialization with SHA-256 hash in automatic mode
@@ -124,13 +123,14 @@ all drives.
 Engine.Init( getApplicationContext(),
              ApiKey,
              HashId( "androidexample@tourmalinelabs.com" ),
-             true, // set to `false` for manual mode
+             Engine.MonitoringMode.AUTOMATIC,
              note,
              new CompletionListener() {
                 @Override
-           		public void OnSuccess() {}
+                public void OnSuccess() {}
                 @Override
-                public void OnFail( int i, String s ) {} );
+                public void OnFail( int i, String s ) {}
+             );
 ```
 
 #### Starting a new drive
@@ -276,6 +276,10 @@ mgr.registerReceiver(
                    case Engine.SDK_UPDATE_AVAILABLE: {
                      Log.i(LOG_AREA, "SDK_UPDATE_AVAILABLE");
                      break;
+                  }
+                  case Engine.SYNCHRONIZED: {
+                     //All records have been processed and sent to the backend
+                     Log.i(LOG_AREA, "SYNCHRONIZED");
                   }
                }
         },
@@ -455,13 +459,13 @@ ActivityManager.UregisterTelematicsEventListener(telematicsListener);
 ```
 
 
-### Querying telematics history
+### Querying telematics for a specific drive
 
-TLKit provides the ability to query past telematics via
-`GetTelematicsEvents` method of the Engine. These can be used as follows:
+TLKit provides the ability to query drive related telematics via  
+`GetTripTelematicsEvents` method of the Engine. You just need to provide the drive Id. These can be used as follows:
 
 ```java
-ActivityManager.GetTelematicsEvents(new Date(-24*60*60*1000), new Date(), 1, 100, new PaginatedQueryHandler<ArrayList<TelematicsEvent>>() {
+ActivityManager.GetTripTelematicsEvents("acae3146-1f64-4f0d-9cfa-3c56f0c0cf68", new PaginatedQueryHandler<ArrayList<TelematicsEvent>>() {
             @Override
             public void Result(final int currentPage, final int pageCount, final int resultCount, ArrayList<TelematicsEvent> res) {}
 
