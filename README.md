@@ -465,9 +465,9 @@ TLKit provides the ability to query drive related telematics via
 `GetTripTelematicsEvents` method of the Engine. You just need to provide the drive Id. These can be used as follows:
 
 ```java
-ActivityManager.GetTripTelematicsEvents("acae3146-1f64-4f0d-9cfa-3c56f0c0cf68", new PaginatedQueryHandler<ArrayList<TelematicsEvent>>() {
+ActivityManager.GetTripTelematicsEvents("acae3146-1f64-4f0d-9cfa-3c56f0c0cf68", new QueryHandler<ArrayList<TelematicsEvent>>() {
             @Override
-            public void Result(final int currentPage, final int pageCount, final int resultCount, ArrayList<TelematicsEvent> res) {}
+            public void Result(ArrayList<TelematicsEvent> res) {}
 
             @Override
             public void OnFail(int code, String message) {}

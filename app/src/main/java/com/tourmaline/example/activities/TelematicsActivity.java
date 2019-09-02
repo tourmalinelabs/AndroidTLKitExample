@@ -31,7 +31,6 @@ import android.widget.Toast;
 
 import com.tourmaline.context.ActivityManager;
 import com.tourmaline.context.Drive;
-import com.tourmaline.context.PaginatedQueryHandler;
 import com.tourmaline.context.QueryHandler;
 import com.tourmaline.context.TelematicsEvent;
 import com.tourmaline.context.TelematicsEventListener;

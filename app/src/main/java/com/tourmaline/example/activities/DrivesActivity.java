@@ -197,7 +197,7 @@ public class DrivesActivity extends Activity {
 
         final Calendar calendar = Calendar.getInstance();
         final Date endTime = calendar.getTime();
-        calendar.add(Calendar.DATE, -7);
+        calendar.add(Calendar.DATE, -30);
         final Date startTime = calendar.getTime();
         ActivityManager.GetDrives(startTime, endTime, 50, queryHandler);
     }

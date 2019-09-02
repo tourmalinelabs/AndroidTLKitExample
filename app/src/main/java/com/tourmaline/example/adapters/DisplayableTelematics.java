@@ -49,6 +49,7 @@ public class DisplayableTelematics {
             case LEFT:  this.type = "Type: LEFT"; break;
             case RIGHT: this.type = "Type: RIGHT"; break;
             case PHONE: this.type = "Type: PHONE"; break;
+            case SPEED: this.type = "Type: SPEED"; break;
             default: break;
         }
         final DecimalFormat posFormat = new DecimalFormat("0.0000");
