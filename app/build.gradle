@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId "com.tourmaline.ckexample"
-        minSdkVersion 16
+        minSdkVersion 19
         targetSdkVersion 28
 
         versionCode 89
@@ -26,7 +26,7 @@ android {
 
 dependencies {
     //TLKits
-    implementation("com.tourmalinelabs.android:TLKit:14.4.19100200")
+    implementation("com.tourmalinelabs.android:TLKit:15.0.19110600")
     //App UI
     implementation("com.android.support:appcompat-v7:28.0.0")
 }

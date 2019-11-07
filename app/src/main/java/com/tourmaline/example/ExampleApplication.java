@@ -56,7 +56,7 @@ public class ExampleApplication extends Application {
     private static final String LOG_AREA = "ExampleApplication";
 
     private static final String ApiKey    = "bdf760a8dbf64e35832c47d8d8dffcc0";
-    private static final String user      = "androidexample@tourmalinelabs.com";
+    private static final String user      = %PUT_HERE_A_USER_IDENTIFIER%  //example: "androidexample@tourmalinelabs.com";
 
     private ActivityListener activityListener;
     private LocationListener locationListener;
