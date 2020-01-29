@@ -21,7 +21,6 @@
 package com.tourmaline.example;
 
 import android.app.Application;
-import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
@@ -29,9 +28,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.tourmaline.context.ActivityEvent;
 import com.tourmaline.context.ActivityListener;
@@ -141,6 +140,7 @@ public class ExampleApplication extends Application {
         // Want to attach the lifecycle broadcast listener to the application
         // context since that is the only context guaranteed to last for full
         // application lifetime
+
         final LocalBroadcastManager mgr = LocalBroadcastManager.getInstance(this);
         mgr.registerReceiver(
                 new BroadcastReceiver() {

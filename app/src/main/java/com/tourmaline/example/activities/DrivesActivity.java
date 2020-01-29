@@ -44,6 +44,7 @@ import com.tourmaline.example.helpers.Progress;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 
@@ -67,6 +68,7 @@ public class DrivesActivity extends Activity {
                 @Override
                 public void onClick(View view) {
                     final UUID uuid = ActivityManager.StartManualTrip();
+
                     Toast.makeText(DrivesActivity.this, "New Drive with id " + uuid.toString() + " is now recording", Toast.LENGTH_LONG).show();
                 }
             });

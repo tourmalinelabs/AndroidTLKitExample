@@ -28,7 +28,7 @@ repositories {
 
 ```groovy
 dependencies {
-    implementation("com.tourmalinelabs.android:TLKit:15.0.19110600")
+    implementation("com.tourmalinelabs.android:TLKit:15.3.20012900")
 }
 ```
 
@@ -143,6 +143,13 @@ final UUID uuid = ActivityManager.StartManualTrip();
 
 When starting a new drive you receive an id in return.
 
+If you use alternatively the following method:
+
+```java
+final UUID uuid = ActivityManager.StartSingleManualTrip();
+```
+to start a manual drive and if a drive is already recording you will get the same former uuid because only one drive can be recorded at a time.
+
 #### Stoping a drive
 
 For stopping a drive you need to call StopManualTrip with the right id.
@@ -154,6 +161,13 @@ ActivityManager.StopManualTrip(uuid);
 Note that until a drive is explicitly stopped it will continue to record data.
 Even if the SDK is restarted, it will continue to record data for any trips that
 it was recording.
+
+If you use alternatively the following method:
+
+```java
+ActivityManager.StopAllManualTrips();
+```
+all trips that are currently recording are stopped in a raw.
 
 #### Current manual drives
 
