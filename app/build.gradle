@@ -13,8 +13,8 @@ android {
         minSdkVersion 19
         targetSdkVersion 28
 
-        versionCode 90
-        versionName "15.3.20012900"
+        versionCode 91
+        versionName "15.5.20050400"
     }
     buildTypes {
         release {
@@ -26,7 +26,7 @@ android {
 
 dependencies {
     //TLKit dependency
-    implementation("com.tourmalinelabs.android:TLKit:15.3.20012900")
+    implementation("com.tourmalinelabs.android:TLKit:15.5.20050400")
 
     //Android dependencies
     implementation ('androidx.appcompat:appcompat:1.1.0')

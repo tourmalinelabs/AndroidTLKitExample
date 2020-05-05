@@ -21,6 +21,7 @@
 
 package com.tourmaline.example.activities;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -31,6 +32,7 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import android.util.Log;
@@ -165,10 +167,10 @@ public class MainActivity extends Activity {
 
         final int googlePlayStat = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this);
         if (googlePlayStat == ConnectionResult.SUCCESS) { //check GooglePlayServices
-            final String[] missingPerms = Engine.MissingPermissions(this);
-            if (missingPerms.length > 0) { //Check Permissions (Location)
+            boolean missingLocationPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)!=PackageManager.PERMISSION_GRANTED;
+            if (missingLocationPermission) { //Check Permissions (Location)
                 targetMonitoringState = monitoring;
-                ActivityCompat.requestPermissions(this, missingPerms, PERMISSIONS_REQUEST);
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST);
             } else {
                 startMonitoring(monitoring);
             }
@@ -228,7 +230,7 @@ public class MainActivity extends Activity {
         });
     }
 
-    private boolean permissionGranted(@NonNull String permissions[], @NonNull int[] grantResults) {
+    private boolean permissionGranted(@NonNull String[] permissions, @NonNull int[] grantResults) {
         boolean permissionGranted = true;
         for ( int i = 0; i < grantResults.length; ++i ) {
             if( grantResults[i] != PackageManager.PERMISSION_GRANTED) {
@@ -240,7 +242,7 @@ public class MainActivity extends Activity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if(requestCode == PERMISSIONS_REQUEST) {
             if(permissionGranted(permissions, grantResults) ) {
                 Log.i( TAG, "Permissions granted");

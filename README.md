@@ -28,7 +28,7 @@ repositories {
 
 ```groovy
 dependencies {
-    implementation("com.tourmalinelabs.android:TLKit:15.3.20012900")
+    implementation("com.tourmalinelabs.android:TLKit:15.5.20050400")
 }
 ```
 
@@ -40,7 +40,6 @@ The following permissions will be automatically imported into your project.
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
