@@ -29,6 +29,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -63,6 +64,7 @@ public class MainActivity extends Activity {
     private LinearLayout alertLayout;
     private TextView alertGpsTextView;
     private TextView alertLocationTextView;
+    private TextView alertMotionTextView;
     private TextView alertPowerTextView;
     private TextView alertSdkUpToDateTextView;
     private Monitoring.State targetMonitoringState;
@@ -82,6 +84,7 @@ public class MainActivity extends Activity {
         alertLayout = findViewById(R.id.alert_layout);
         alertGpsTextView = findViewById(R.id.alert_gps);
         alertLocationTextView = findViewById(R.id.alert_location);
+        alertMotionTextView = findViewById(R.id.alert_motion);
         alertPowerTextView = findViewById(R.id.alert_power);
         alertSdkUpToDateTextView = findViewById(R.id.alert_sdk);
         startAutomaticButton.setOnClickListener(new View.OnClickListener() {
@@ -167,13 +170,12 @@ public class MainActivity extends Activity {
 
         final int googlePlayStat = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this);
         if (googlePlayStat == ConnectionResult.SUCCESS) { //check GooglePlayServices
-            boolean missingLocationPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)!=PackageManager.PERMISSION_GRANTED;
-            if (missingLocationPermission) { //Check Permissions (Location)
-                targetMonitoringState = monitoring;
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST);
-            } else {
-                startMonitoring(monitoring);
+            targetMonitoringState = monitoring;
+            String[] permissions = new String[]{Manifest.permission.ACCESS_FINE_LOCATION};
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                permissions = new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACTIVITY_RECOGNITION};
             }
+            ActivityCompat.requestPermissions(this, permissions, PERMISSIONS_REQUEST);
         } else {
             Log.i(TAG, "Google play status is " + googlePlayStat);
             stopMonitoring();
@@ -300,6 +302,7 @@ public class MainActivity extends Activity {
         final ExampleApplication app = (ExampleApplication) getApplication();
         showAlertGps(!app.isGpsEnable());
         showAlertLocation(!app.isLocationPermissionGranted());
+        showAlertMotion(!app.isActivityRecognitionPermissionGranted());
         showAlertPower(app.isPowerSavingEnable());
         showAlertSdkUpToDate(!app.isSdkUpToDate());
     }
@@ -315,6 +318,8 @@ public class MainActivity extends Activity {
                     case Engine.GPS_DISABLED:
                     case Engine.LOCATION_PERMISSION_GRANTED:
                     case Engine.LOCATION_PERMISSION_DENIED:
+                    case Engine.ACTIVITY_RECOGNITION_PERMISSION_GRANTED:
+                    case Engine.ACTIVITY_RECOGNITION_PERMISSION_DENIED:
                     case Engine.POWER_SAVE_MODE_DISABLED:
                     case Engine.POWER_SAVE_MODE_ENABLED:
                     case Engine.SDK_UP_TO_DATE:
@@ -353,6 +358,16 @@ public class MainActivity extends Activity {
         } else {
             alertLocationTextView.setText("Location permission *** ON");
             alertLocationTextView.setTextColor(getResources().getColor(R.color.blue));
+        }
+    }
+
+    private void showAlertMotion(boolean show) {
+        if(show) {
+            alertMotionTextView.setText("Motion permission *** OFF");
+            alertMotionTextView.setTextColor(getResources().getColor(R.color.red));
+        } else {
+            alertMotionTextView.setText("Motion permission *** ON");
+            alertMotionTextView.setTextColor(getResources().getColor(R.color.blue));
         }
     }
 

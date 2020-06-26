@@ -171,6 +171,16 @@
                 android:text="Location permission: Granted"/>
 
             <TextView
+                android:id="@+id/alert_motion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dip"
+                android:gravity="center_vertical"
+                android:textSize="14sp"
+                android:textColor="@color/black"
+                android:text="Motion permission: Granted"/>
+
+            <TextView
                 android:id="@+id/alert_power"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

@@ -69,6 +69,10 @@ public class ExampleApplication extends Application {
     public boolean isLocationPermissionGranted() {
         return locationPermissionGranted;
     }
+    private boolean activityRecognitionPermissionGranted=true;
+    public boolean isActivityRecognitionPermissionGranted() {
+        return activityRecognitionPermissionGranted;
+    }
     private boolean powerSavingEnable=false;
     public boolean isPowerSavingEnable() {
         return powerSavingEnable;
@@ -205,14 +209,26 @@ public class ExampleApplication extends Application {
                                 //only when it needs to get a new location, then it can take several
                                 //minutes for the notification to disappear
                                 locationPermissionGranted = true;
-                                Alerts.hide(getApplicationContext(), Alerts.Type.PERMISSION);
+                                Alerts.hide(getApplicationContext(), Alerts.Type.PERM_LOCATION);
                                 break;
                             }
                             case Engine.LOCATION_PERMISSION_DENIED: {
                                 Log.i(LOG_AREA, "LOCATION_PERMISSION_DENIED");
                                 //In that case Android OS restart the app automatically
                                 locationPermissionGranted = false;
-                                Alerts.show(getApplicationContext(), Alerts.Type.PERMISSION);
+                                Alerts.show(getApplicationContext(), Alerts.Type.PERM_LOCATION);
+                                break;
+                            }
+                            case Engine.ACTIVITY_RECOGNITION_PERMISSION_GRANTED: {
+                                Log.i(LOG_AREA, "ACTIVITY_RECOGNITION_PERMISSION_GRANTED");
+                                activityRecognitionPermissionGranted = true;
+                                Alerts.hide(getApplicationContext(), Alerts.Type.PERM_MOTION);
+                                break;
+                            }
+                            case Engine.ACTIVITY_RECOGNITION_PERMISSION_DENIED: {
+                                Log.i(LOG_AREA, "ACTIVITY_RECOGNITION_PERMISSION_DENIED");
+                                activityRecognitionPermissionGranted = false;
+                                Alerts.show(getApplicationContext(), Alerts.Type.PERM_MOTION);
                                 break;
                             }
                             case Engine.POWER_SAVE_MODE_DISABLED: {

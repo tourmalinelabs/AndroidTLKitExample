@@ -6,16 +6,22 @@ repositories {
 }
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 29
 
     defaultConfig {
         applicationId "com.tourmaline.ckexample"
         minSdkVersion 19
-        targetSdkVersion 28
+        targetSdkVersion 29
 
-        versionCode 91
-        versionName "15.5.20050400"
+        versionCode 92
+        versionName "15.5.20062300"
     }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -26,7 +32,7 @@ android {
 
 dependencies {
     //TLKit dependency
-    implementation("com.tourmalinelabs.android:TLKit:15.5.20050400")
+    implementation("com.tourmalinelabs.android:TLKit:15.5.20062300")
 
     //Android dependencies
     implementation ('androidx.appcompat:appcompat:1.1.0')

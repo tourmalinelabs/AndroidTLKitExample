@@ -38,17 +38,20 @@ import static androidx.core.app.NotificationCompat.VISIBILITY_SECRET;
 public class Alerts {
 
     private static final String NOTIF_CHANNEL_ID_GPS = "notif-channel-id-gps";
-    private static final String NOTIF_CHANNEL_ID_PERMISSION = "notif-channel-id-permission";
+    private static final String NOTIF_CHANNEL_ID_PERM_LOCATION = "notif-channel-id-permission";
+    private static final String NOTIF_CHANNEL_ID_PERM_MOTION = "notif-channel-id-motion";
     private static final String NOTIF_CHANNEL_ID_POWER = "notif-channel-id-power";
 
     private static final int NOTIF_ID_GPS = 24352;
-    private static final int NOTIF_ID_PERMISSION = 24354;
+    private static final int NOTIF_ID_PERM_LOCATION = 24354;
+    private static final int NOTIF_ID_PERM_MOTION = 24355;
     private static final int NOTIF_ID_POWER = 24356;
 
-    public enum Type { GPS, PERMISSION, POWER };
+    public enum Type { GPS, PERM_LOCATION, PERM_MOTION, POWER };
 
     public static void show(final Context context, final Type type) {
         final NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        if(notificationManager==null) return;
 
         String channelId    = "";
         String channelTitle = "";
@@ -67,12 +70,21 @@ public class Alerts {
                 notifId = NOTIF_ID_GPS;
                 break;
             }
-            case PERMISSION: {
-                channelId = NOTIF_CHANNEL_ID_PERMISSION;
+            case PERM_LOCATION: {
+                channelId = NOTIF_CHANNEL_ID_PERM_LOCATION;
                 channelTitle = context.getString(R.string.permission_notif_title);
                 notifTitle = context.getString(R.string.permission_notif_title);
                 largeIconRes = R.mipmap.ic_location_off_black;
-                notifId = NOTIF_ID_PERMISSION;
+                notifId = NOTIF_ID_PERM_LOCATION;
+                break;
+            }
+            case PERM_MOTION: {
+                channelId = NOTIF_CHANNEL_ID_PERM_MOTION;
+                channelTitle = context.getString(R.string.motion_notif_title);
+                notifTitle = context.getString(R.string.motion_notif_title);
+                notifText    = context.getString(R.string.app_name) + " " +  context.getString(R.string.motion_notif_text);
+                largeIconRes = R.mipmap.ic_warning_white;
+                notifId = NOTIF_ID_PERM_MOTION;
                 break;
             }
             case POWER: {
@@ -108,9 +120,11 @@ public class Alerts {
 
     public static void hide(final Context context, final Type type) {
         final NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        if(notificationManager==null) return;
         switch (type) {
             case GPS: notificationManager.cancel(NOTIF_ID_GPS); break;
-            case PERMISSION: notificationManager.cancel(NOTIF_ID_PERMISSION); break;
+            case PERM_LOCATION: notificationManager.cancel(NOTIF_ID_PERM_LOCATION); break;
+            case PERM_MOTION: notificationManager.cancel(NOTIF_ID_PERM_MOTION); break;
             case POWER: notificationManager.cancel(NOTIF_ID_POWER); break;
         }
     }

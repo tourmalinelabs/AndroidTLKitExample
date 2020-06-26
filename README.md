@@ -28,7 +28,7 @@ repositories {
 
 ```groovy
 dependencies {
-    implementation("com.tourmalinelabs.android:TLKit:15.5.20050400")
+    implementation("com.tourmalinelabs.android:TLKit:15.5.20062300")
 }
 ```
 
@@ -44,6 +44,8 @@ The following permissions will be automatically imported into your project.
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION" />
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+
 ```
 Also the SDK uses the following device features:
 ```xml
@@ -53,10 +55,7 @@ Also the SDK uses the following device features:
 ```
 
 ### Requesting permissions in app
-For Android versions 6 and above the application also needs to explicitly ask
-for a set of permissions from the user. `Engine.MissingPermissions` provides a
-list of the required permissions that can be passed to
-`ActivityCompat.requestPermissions`
+You have to deal with the system to request permissions for Location and Activity Recognition.
 
 # Using TLKit
 
@@ -216,84 +215,92 @@ mgr.registerReceiver(
             public void onReceive(Context context, Intent i) {
                int state = i.getIntExtra("state", Engine.INIT_SUCCESS);
                switch (state) {
-                   case Engine.INIT_SUCCESS: {
-                       Log.i(LOG_AREA, "ENGINE INIT SUCCESS");
-                       registerActivityListener();
-                       registerLocationListener();
-                       break;
-                   }
-                   case Engine.INIT_REQUIRED: {
-                       Log.i(LOG_AREA, "ENGINE INIT REQUIRED: Engine " +
-                               "needs to restart in background...");
-                       final Monitoring.State monitoringState =
-                               Monitoring.getState(getApplicationContext());
-                       final CompletionListener listener = new CompletionListener() {
-                           @Override
-                           public void OnSuccess() {
-                           }
-
-                           @Override
-                           public void OnFail(int i, String s) {
-                           }
-                       };
-                       switch (monitoringState) {
-                           case AUTOMATIC:
-                               initEngine(true, listener);
-                               break;
-                           case MANUAL:
-                               initEngine(false, listener);
-                               break;
-                           default:
-                               break;
-                       }
-                       break;
-                   }
-                   case Engine.INIT_FAILURE: {
-                       final String msg = i.getStringExtra("message");
-                       final int reason = i.getIntExtra("reason", 0);
-                       Log.e(LOG_AREA, "ENGINE INIT FAILURE" + reason + ": " + msg);
-                       break;
-                   }
-                   case Engine.GPS_ENABLED: {
-                       Log.i(LOG_AREA, "GPS_ENABLED");
-                       break;
-                   }
-                   case Engine.GPS_DISABLED: {
-                       Log.i(LOG_AREA, "GPS_DISABLED");
-                       break;
-                   }
-                   case Engine.LOCATION_PERMISSION_GRANTED: {
-                       Log.i(LOG_AREA, "LOCATION_PERMISSION_GRANTED");
-                       break;
-                   }
-                   case Engine.LOCATION_PERMISSION_DENIED: {
-                       Log.i(LOG_AREA, "LOCATION_PERMISSION_DENIED");
-                       break;
-                   }
-                   case Engine.POWER_SAVE_MODE_DISABLED: {
-                       Log.i(LOG_AREA, "POWER_SAVE_MODE_DISABLED");
-                       break;
-                   }
-                   case Engine.POWER_SAVE_MODE_ENABLED: {
-                       Log.i(LOG_AREA, "POWER_SAVE_MODE_ENABLED");
-                       break;
-                   }
-                   case Engine.SDK_UP_TO_DATE: {
-                       Log.i(LOG_AREA, "SDK_UP_TO_DATE");
-                       break;
-                   }
-                   case Engine.SDK_UPDATE_MANDATORY: {
-                       Log.i(LOG_AREA, "SDK_UPDATE_MANDATORY");
-                       break;
-                   }
-                   case Engine.SDK_UPDATE_AVAILABLE: {
-                     Log.i(LOG_AREA, "SDK_UPDATE_AVAILABLE");
+                 case Engine.INIT_SUCCESS: {
+                     Log.i(LOG_AREA, "ENGINE INIT SUCCESS");
+                     registerActivityListener();
+                     registerLocationListener();
                      break;
-                  }
-                  case Engine.SYNCHRONIZED: {
-                     //All records have been processed and sent to the backend
-                     Log.i(LOG_AREA, "SYNCHRONIZED");
-                  }
+                 }
+                 case Engine.INIT_REQUIRED: {
+                     Log.i(LOG_AREA, "ENGINE INIT REQUIRED: Engine " +
+                             "needs to restart in background...");
+                     final Monitoring.State monitoringState =
+                             Monitoring.getState(getApplicationContext());
+                     final CompletionListener listener = new CompletionListener() {
+                         @Override
+                         public void OnSuccess() {
+                         }
+
+                         @Override
+                         public void OnFail(int i, String s) {
+                         }
+                     };
+                     switch (monitoringState) {
+                         case AUTOMATIC:
+                             initEngine(true, listener);
+                             break;
+                         case MANUAL:
+                             initEngine(false, listener);
+                             break;
+                         default:
+                             break;
+                     }
+                     break;
+                 }
+                 case Engine.INIT_FAILURE: {
+                     final String msg = i.getStringExtra("message");
+                     final int reason = i.getIntExtra("reason", 0);
+                     Log.e(LOG_AREA, "ENGINE INIT FAILURE" + reason + ": " + msg);
+                     break;
+                 }
+                 case Engine.GPS_ENABLED: {
+                     Log.i(LOG_AREA, "GPS_ENABLED");
+                     break;
+                 }
+                 case Engine.GPS_DISABLED: {
+                     Log.i(LOG_AREA, "GPS_DISABLED");
+                     break;
+                 }
+                 case Engine.LOCATION_PERMISSION_GRANTED: {
+                     Log.i(LOG_AREA, "LOCATION_PERMISSION_GRANTED");
+                     break;
+                 }
+                 case Engine.LOCATION_PERMISSION_DENIED: {
+                     Log.i(LOG_AREA, "LOCATION_PERMISSION_DENIED");
+                     break;
+                 }
+                 case Engine.ACTIVITY_RECOGNITION_PERMISSION_GRANTED: {
+                      Log.i(LOG_AREA, "ACTIVITY_RECOGNITION_PERMISSION_GRANTED");
+                      break;
+                }
+                case Engine.ACTIVITY_RECOGNITION_PERMISSION_DENIED: {
+                      Log.i(LOG_AREA, "ACTIVITY_RECOGNITION_PERMISSION_DENIED");
+                      break;
+                }
+                case Engine.POWER_SAVE_MODE_DISABLED: {
+                     Log.i(LOG_AREA, "POWER_SAVE_MODE_DISABLED");
+                     break;
+                 }
+                 case Engine.POWER_SAVE_MODE_ENABLED: {
+                     Log.i(LOG_AREA, "POWER_SAVE_MODE_ENABLED");
+                     break;
+                 }
+                 case Engine.SDK_UP_TO_DATE: {
+                     Log.i(LOG_AREA, "SDK_UP_TO_DATE");
+                     break;
+                 }
+                 case Engine.SDK_UPDATE_MANDATORY: {
+                     Log.i(LOG_AREA, "SDK_UPDATE_MANDATORY");
+                     break;
+                 }
+                 case Engine.SDK_UPDATE_AVAILABLE: {
+                   Log.i(LOG_AREA, "SDK_UPDATE_AVAILABLE");
+                   break;
+                }
+                case Engine.SYNCHRONIZED: {
+                   //All records have been processed and sent to the backend
+                   Log.i(LOG_AREA, "SYNCHRONIZED");
+                }
                }
         },
         new IntentFilter(Engine.ACTION_LIFECYCLE));

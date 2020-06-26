@@ -41,6 +41,8 @@
     <string name="gps_notif_text">can\'t work.</string>
     <string name="permission_notif_title">Location Permission denied</string>
     <string name="permission_notif_text">can\'t work.</string>
+    <string name="motion_notif_title">Activity Motion Permission denied</string>
+    <string name="motion_notif_text">may not work optimally.</string>
     <string name="power_notif_title">Power saving mode activated</string>
     <string name="power_notif_text">can\'t work efficiently.</string>
 
