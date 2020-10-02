@@ -147,17 +147,17 @@ public class DrivesActivity extends Activity {
             @Override
             public void Result( ArrayList<Drive> drives ) {
 
-                final ArrayList<DisplayableDrive> list = new ArrayList<>();
-                // completed drives
-                for (final Drive drive : drives) {
-                    final DisplayableDrive displayableDrive = new DisplayableDrive(getApplicationContext(), drive, false, "-");
-                    list.add(displayableDrive);
-                }
-
-                //manual monitored drives
                 final ArrayList<Drive> manualDrives = ActivityManager.ActiveManualDrives();
-                for (final Drive manualDrive : manualDrives) {
-                    final DisplayableDrive displayableDrive = new DisplayableDrive(getApplicationContext(), manualDrive, true, "-");
+                final ArrayList<DisplayableDrive> list = new ArrayList<>();
+                for (final Drive drive : drives) {
+                    boolean manualMonitoring = false;
+                    for(final Drive manualDrive : manualDrives) {
+                        if(manualDrive.Id().equals(drive.Id())) {
+                            manualMonitoring = true;
+                            break;
+                        }
+                    }
+                    final DisplayableDrive displayableDrive = new DisplayableDrive(getApplicationContext(), drive, manualMonitoring, "-");
                     list.add(displayableDrive);
                 }
 
