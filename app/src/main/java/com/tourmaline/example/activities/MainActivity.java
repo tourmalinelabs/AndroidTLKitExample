@@ -172,7 +172,7 @@ public class MainActivity extends Activity {
             targetMonitoringState = monitoring;
             String[] permissions = new String[]{Manifest.permission.ACCESS_FINE_LOCATION};
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                permissions = new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACTIVITY_RECOGNITION};
+                permissions = new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_BACKGROUND_LOCATION, Manifest.permission.ACTIVITY_RECOGNITION};
             }
             ActivityCompat.requestPermissions(this, permissions, PERMISSIONS_REQUEST);
         } else {
