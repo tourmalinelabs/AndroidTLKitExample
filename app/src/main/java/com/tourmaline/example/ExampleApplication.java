@@ -166,12 +166,9 @@ public class ExampleApplication extends Application {
                                         Monitoring.getState(getApplicationContext());
                                 final CompletionListener listener = new CompletionListener() {
                                     @Override
-                                    public void OnSuccess() {
-                                    }
-
+                                    public void OnSuccess() { }
                                     @Override
-                                    public void OnFail(int i, String s) {
-                                    }
+                                    public void OnFail(int i, String s) { }
                                 };
                                 switch (monitoringState) {
                                     case AUTOMATIC:

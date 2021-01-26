@@ -54,7 +54,8 @@ import com.tourmaline.example.helpers.Monitoring;
 public class MainActivity extends Activity {
     private static final String TAG = "MainActivity";
 
-    private static final int PERMISSIONS_REQUEST = 210;
+    private static final int PERMISSIONS_REQUEST_BACKGROUND = 210;
+    private static final int PERMISSIONS_REQUEST_FOREGROUND = 211;
     private LinearLayout apiLayout;
     private TextView engStateTextView;
     private Button startAutomaticButton;
@@ -170,11 +171,17 @@ public class MainActivity extends Activity {
         final int googlePlayStat = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this);
         if (googlePlayStat == ConnectionResult.SUCCESS) { //check GooglePlayServices
             targetMonitoringState = monitoring;
-            String[] permissions = new String[]{Manifest.permission.ACCESS_FINE_LOCATION};
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                permissions = new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_BACKGROUND_LOCATION, Manifest.permission.ACTIVITY_RECOGNITION};
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                //Implicit background location
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST_BACKGROUND);
+            } else if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
+                //The system popup will show "Always Allow" for the location permission
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_BACKGROUND_LOCATION, Manifest.permission.ACTIVITY_RECOGNITION}, PERMISSIONS_REQUEST_BACKGROUND);
+            } else if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
+                //Need to ask Foreground then Background location permission
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACTIVITY_RECOGNITION}, PERMISSIONS_REQUEST_FOREGROUND);
             }
-            ActivityCompat.requestPermissions(this, permissions, PERMISSIONS_REQUEST);
+
         } else {
             Log.i(TAG, "Google play status is " + googlePlayStat);
             stopMonitoring();
@@ -242,14 +249,35 @@ public class MainActivity extends Activity {
         return permissionGranted;
     }
 
+    private boolean permissionGranted(@NonNull String permission, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        for ( int i = 0; i < grantResults.length; ++i ) {
+            if( permission.equals(permissions[i]) &&  grantResults[i] == PackageManager.PERMISSION_GRANTED) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if(requestCode == PERMISSIONS_REQUEST) {
-            if(permissionGranted(permissions, grantResults) ) {
-                Log.i( TAG, "Permissions granted");
-            } else {
-                Log.i( TAG, "Permissions missing");
+
+        if(permissionGranted(permissions, grantResults) ) {
+            Log.i( TAG, "Permissions granted for requestCode " + requestCode);
+        } else {
+            Log.i( TAG, "Permissions missing for requestCode " + requestCode);
+        }
+
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
+            if (requestCode == PERMISSIONS_REQUEST_FOREGROUND) {
+                if (permissionGranted(Manifest.permission.ACCESS_FINE_LOCATION, permissions, grantResults)) {
+                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_BACKGROUND_LOCATION}, PERMISSIONS_REQUEST_BACKGROUND);
+                    return;
+                }
+                startMonitoring(targetMonitoringState);
             }
+        }
+
+        if(requestCode == PERMISSIONS_REQUEST_BACKGROUND) {
             startMonitoring(targetMonitoringState);
         }
     }
