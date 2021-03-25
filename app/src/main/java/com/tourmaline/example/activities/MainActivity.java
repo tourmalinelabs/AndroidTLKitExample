@@ -33,6 +33,7 @@ import android.os.Build;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import android.util.Log;
@@ -172,6 +173,11 @@ public class MainActivity extends Activity {
         if (googlePlayStat == ConnectionResult.SUCCESS) { //check GooglePlayServices
             targetMonitoringState = monitoring;
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)==PackageManager.PERMISSION_GRANTED) {
+                    //very old platform allow the permission from the manifest (no user request is needed)
+                    startMonitoring(targetMonitoringState);
+                    return;
+                }
                 //Implicit background location
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST_BACKGROUND);
             } else if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
