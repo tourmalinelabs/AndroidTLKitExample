@@ -28,7 +28,7 @@ repositories {
 
 ```groovy
 dependencies {
-    implementation("com.tourmalinelabs.android:TLKit:15.8.20112300")
+    implementation("com.tourmalinelabs.android:TLKit:17.0.21062900")
 }
 ```
 
@@ -229,9 +229,12 @@ mgr.registerReceiver(
                              Monitoring.getState(getApplicationContext());
                      final CompletionListener listener = new CompletionListener() {
                          @Override
-                         public void OnSuccess() {}
+                         public void OnSuccess() {
+                         }
+
                          @Override
-                         public void OnFail(int i, String s) {}
+                         public void OnFail(int i, String s) {
+                         }
                      };
                      switch (monitoringState) {
                          case AUTOMATIC:
