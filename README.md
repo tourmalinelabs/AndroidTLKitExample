@@ -28,7 +28,7 @@ repositories {
 
 ```groovy
 dependencies {
-    implementation("com.tourmalinelabs.android:TLKit:17.0.21062900")
+    implementation("com.tourmalinelabs.android:TLKit:17.1.21082701")
 }
 ```
 
@@ -124,6 +124,7 @@ Engine.Init( getApplicationContext(),
              HashId( "androidexample@tourmalinelabs.com" ),
              Engine.MonitoringMode.AUTOMATIC,
              note,
+             null,
              new CompletionListener() {
                 @Override
                 public void OnSuccess() {}

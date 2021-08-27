@@ -117,6 +117,7 @@ public class ExampleApplication extends Application {
                 hashedUserId,
                 automaticMonitoring? Engine.MonitoringMode.AUTOMATIC:Engine.MonitoringMode.MANUAL,
                 note,
+                null,
                 completionListener);
 
     }
