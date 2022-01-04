@@ -77,6 +77,10 @@ public class ExampleApplication extends Application {
     public boolean isPowerSavingEnable() {
         return powerSavingEnable;
     }
+    private boolean batteryOptimisationEnable=true;
+    public boolean isBatteryOptimisationEnable() {
+        return batteryOptimisationEnable;
+    }
     private boolean sdkUpToDate=true;
     public boolean isSdkUpToDate() {
         return sdkUpToDate;
@@ -239,6 +243,20 @@ public class ExampleApplication extends Application {
                                 Log.i(LOG_AREA, "POWER_SAVE_MODE_ENABLED");
                                 powerSavingEnable = true;
                                 Alerts.show(getApplicationContext(), Alerts.Type.POWER);
+                                break;
+                            }
+                            case Engine.BATTERY_OPTIMIZATION_DISABLED: {
+                                Log.i(LOG_AREA, "BATTERY_OPTIMIZATION_DISABLED");
+                                batteryOptimisationEnable=false;
+                                break;
+                            }
+                            case Engine.BATTERY_OPTIMIZATION_ENABLED: {
+                                Log.i(LOG_AREA, "BATTERY_OPTIMIZATION_ENABLED");
+                                batteryOptimisationEnable=true;
+                                break;
+                            }
+                            case Engine.BATTERY_OPTIMIZATION_UNKNOWN: {
+                                Log.i(LOG_AREA, "BATTERY_OPTIMIZATION_UNKNOWN");
                                 break;
                             }
                             case Engine.SDK_UP_TO_DATE: {

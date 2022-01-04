@@ -29,6 +29,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
@@ -36,6 +37,8 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import android.os.PowerManager;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -67,6 +70,7 @@ public class MainActivity extends Activity {
     private TextView alertLocationTextView;
     private TextView alertMotionTextView;
     private TextView alertPowerTextView;
+    private TextView alertBatteryTextView;
     private TextView alertSdkUpToDateTextView;
     private Monitoring.State targetMonitoringState;
 
@@ -87,6 +91,7 @@ public class MainActivity extends Activity {
         alertLocationTextView = findViewById(R.id.alert_location);
         alertMotionTextView = findViewById(R.id.alert_motion);
         alertPowerTextView = findViewById(R.id.alert_power);
+        alertBatteryTextView = findViewById(R.id.alert_battery);
         alertSdkUpToDateTextView = findViewById(R.id.alert_sdk);
         startAutomaticButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -187,7 +192,6 @@ public class MainActivity extends Activity {
                 //Need to ask Foreground then Background location permission
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACTIVITY_RECOGNITION}, PERMISSIONS_REQUEST_FOREGROUND);
             }
-
         } else {
             Log.i(TAG, "Google play status is " + googlePlayStat);
             stopMonitoring();
@@ -204,6 +208,8 @@ public class MainActivity extends Activity {
             stopMonitoring();
             return;
         }
+
+        presentBatteryOptimisationSettings();
 
         if (!Engine.IsInitialized()) { //check Engine State
             ((ExampleApplication)getApplication()).initEngine((monitoring==Monitoring.State.AUTOMATIC), new CompletionListener() {
@@ -288,6 +294,25 @@ public class MainActivity extends Activity {
         }
     }
 
+    public boolean presentBatteryOptimisationSettings() {
+        Log.d(TAG, "Battery settings");
+        PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M || powerManager.isIgnoringBatteryOptimizations(getPackageName())) {
+            return false;
+        }
+
+        //android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+        Intent intent = new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, Uri.parse("package:" + getPackageName()));
+        if(intent.resolveActivity(getPackageManager()) == null) {
+            intent = new Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
+            if(intent.resolveActivity(getPackageManager()) == null) {
+                return false;
+            }
+        }
+        startActivity(intent);
+        return true;
+    }
+
     private void makeUIChangesOnEngineMonitoring(final Monitoring.State monitoring) {
         runOnUiThread( new Runnable() {
             @Override
@@ -336,6 +361,7 @@ public class MainActivity extends Activity {
         showAlertGps(!app.isGpsEnable());
         showAlertLocation(!app.isLocationPermissionGranted());
         showAlertMotion(!app.isActivityRecognitionPermissionGranted());
+        showAlertBattery(app.isBatteryOptimisationEnable());
         showAlertPower(app.isPowerSavingEnable());
         showAlertSdkUpToDate(!app.isSdkUpToDate());
     }
@@ -355,6 +381,9 @@ public class MainActivity extends Activity {
                     case Engine.ACTIVITY_RECOGNITION_PERMISSION_DENIED:
                     case Engine.POWER_SAVE_MODE_DISABLED:
                     case Engine.POWER_SAVE_MODE_ENABLED:
+                    case Engine.BATTERY_OPTIMIZATION_DISABLED:
+                    case Engine.BATTERY_OPTIMIZATION_ENABLED:
+                    case Engine.BATTERY_OPTIMIZATION_UNKNOWN:
                     case Engine.SDK_UP_TO_DATE:
                     case Engine.SDK_UPDATE_AVAILABLE:
                     case Engine.SDK_UPDATE_MANDATORY:
@@ -411,6 +440,16 @@ public class MainActivity extends Activity {
         } else {
             alertPowerTextView.setText("Power saving mode *** OFF");
             alertPowerTextView.setTextColor(getResources().getColor(R.color.blue));
+        }
+    }
+
+    private void showAlertBattery(boolean show) {
+        if(show) {
+            alertBatteryTextView.setText("Battery optimisation *** ON");
+            alertBatteryTextView.setTextColor(getResources().getColor(R.color.red));
+        } else {
+            alertBatteryTextView.setText("Battery optimisation *** OFF");
+            alertBatteryTextView.setTextColor(getResources().getColor(R.color.blue));
         }
     }
 

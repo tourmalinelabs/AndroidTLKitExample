@@ -28,7 +28,7 @@ repositories {
 
 ```groovy
 dependencies {
-    implementation("com.tourmalinelabs.android:TLKit:17.4.21111500")
+    implementation("com.tourmalinelabs.android:TLKit:17.4.21122400")
 }
 ```
 
@@ -56,7 +56,7 @@ Also the SDK uses the following device features:
 ```
 
 ### Requesting permissions in app
-You have to deal with the system to request permissions for Location and Activity Recognition.
+You have to deal with the system to request permissions for Location and Activity Recognition. Moreover you should ensure the user has switched off battery optimisation settings on his Android device.
 
 # Using TLKit
 
@@ -285,6 +285,18 @@ mgr.registerReceiver(
                  }
                  case Engine.POWER_SAVE_MODE_ENABLED: {
                      Log.i(LOG_AREA, "POWER_SAVE_MODE_ENABLED");
+                     break;
+                 }
+                 case Engine.BATTERY_OPTIMIZATION_DISABLED: {
+                     Log.i(LOG_AREA, "BATTERY_OPTIMIZATION_DISABLED");
+                     break;
+                 }
+                 case Engine.BATTERY_OPTIMIZATION_ENABLED: {
+                     Log.i(LOG_AREA, "BATTERY_OPTIMIZATION_ENABLED");
+                     break;
+                 }
+                 case Engine.BATTERY_OPTIMIZATION_UNKNOWN: {
+                     Log.i(LOG_AREA, "BATTERY_OPTIMIZATION_UNKNOWN");
                      break;
                  }
                  case Engine.SDK_UP_TO_DATE: {

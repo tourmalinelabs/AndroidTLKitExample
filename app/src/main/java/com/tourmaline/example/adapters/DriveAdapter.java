@@ -42,7 +42,7 @@ public class DriveAdapter extends ArrayAdapter<DisplayableDrive> {
         super(activity, 0, objects);
     }
 
-    private class ViewHolder {
+    private static class ViewHolder {
         UUID uuid;
         TextView idTextView;
         TextView eventTypeTextView;

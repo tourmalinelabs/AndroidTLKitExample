@@ -41,7 +41,7 @@ public class TelematicsAdapter extends ArrayAdapter<DisplayableTelematics> {
         super(activity, 0, objects);
     }
 
-    private class ViewHolder {
+    private static class ViewHolder {
         TextView textViewTripId;
         TextView textViewType;
         TextView textViewPosition;

@@ -191,6 +191,16 @@
                 android:text="Power saving mode: Disable"/>
 
             <TextView
+                android:id="@+id/alert_battery"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dip"
+                android:gravity="center_vertical"
+                android:textSize="14sp"
+                android:textColor="@color/black"
+                android:text="Battery optimisation: Disable"/>
+
+            <TextView
                 android:id="@+id/alert_sdk"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

@@ -39,7 +39,7 @@ public class LocationAdapter extends ArrayAdapter<DisplayableLocation> {
         super(activity, 0, objects);
     }
 
-    private class ViewHolder {
+    private static class ViewHolder {
         TextView textViewLocation;
         TextView textViewTime;
         TextView textViewAddress;
