@@ -507,3 +507,13 @@ ActivityManager.GetTripTelematicsEvents("acae3146-1f64-4f0d-9cfa-3c56f0c0cf68", 
             public void OnFail(int code, String message) {}
         });
 ```
+
+# Troubleshooting
+
+As crashes may happen and disturb the activity recording, it is important to monitor the app health by using a crash reporter. To give integrators the choice of tools as well as to avoid dependency conflicts, TLKit does not embed any crash reporting tool into the sdk. We highly recommend that integrators install a third-party crash reporting library such as Firebase Crashlytics, Sentry, etc.
+
+At Tourmaline Labs we are using Firebase Crashlytics in our own apps:
+https://firebase.google.com/docs/crashlytics/get-started
+
+Whatever tool you choose you will need to provide symbols files, you can download them for TLKit version xx.y.zzz at https://s3.amazonaws.com/tlkit-android-symbols/TLKit-xx.y.zzz-symbols.zip
+(for example https://s3.amazonaws.com/tlkit-android-symbols/TLKit-17.4.21122400-symbols.zip)
