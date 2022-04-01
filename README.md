@@ -28,7 +28,7 @@ repositories {
 
 ```groovy
 dependencies {
-    implementation("com.tourmalinelabs.android:TLKit:17.4.21122400")
+    implementation("com.tourmalinelabs.android:TLKit:17.4.22032800")
 }
 ```
 
@@ -56,7 +56,14 @@ Also the SDK uses the following device features:
 ```
 
 ### Requesting permissions in app
-You have to deal with the system to request permissions for Location and Activity Recognition. Moreover you should ensure the user has switched off battery optimisation settings on his Android device.
+You have to deal with the system to request permissions for
+- Location (precise and in background)
+- and Activity Recognition.
+Moreover you should ensure the user has switched off battery optimisation settings on his Android device. You can use that permission to be able to request the user from your app.
+
+```xml
+ <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
+ ```
 
 # Using TLKit
 
@@ -132,6 +139,21 @@ Engine.Init( getApplicationContext(),
                 public void OnFail( int i, String s ) {}
              );
 ```
+
+#### Launch Options
+
+During the Init of the Engine you can set some values which will be stored within your account:
+- your first name
+- your last name
+- your title
+- or an externalId of your choice that is tied to a specific identifier on your side
+
+You can also automatically join a group by providing:
+- an external identifier for that group
+- the identifier of the group
+- or a token for that group
+
+You only need to instantiate a ```LaunchOptions``` object, set the desired options and then pass it to the ```Engine.Init()``` method.
 
 #### Starting a new drive
 

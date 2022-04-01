@@ -6,15 +6,15 @@ repositories {
 }
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 31
 
     defaultConfig {
         applicationId "com.tourmaline.ckexample"
         minSdkVersion 19
-        targetSdkVersion 30
+        targetSdkVersion 31
 
-        versionCode 100
-        versionName "17.4.21122400"
+        versionCode 101
+        versionName "17.4.22032800"
     }
 
     compileOptions {
@@ -32,10 +32,10 @@ android {
 
 dependencies {
     //TLKit dependency
-    implementation("com.tourmalinelabs.android:TLKit:17.4.21122400")
+    implementation("com.tourmalinelabs.android:TLKit:17.4.22032800")
 
     //Android dependencies
-    implementation ('androidx.appcompat:appcompat:1.2.0')
-    implementation ('androidx.localbroadcastmanager:localbroadcastmanager:1.0.0')
-    implementation ('com.google.android.gms:play-services-location:17.1.0')
+    implementation ('androidx.appcompat:appcompat:1.4.1')
+    implementation ('androidx.localbroadcastmanager:localbroadcastmanager:1.1.0')
+    implementation ('com.google.android.gms:play-services-location:19.0.1')
 }
