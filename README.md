@@ -28,7 +28,7 @@ repositories {
 
 ```groovy
 dependencies {
-    implementation("com.tourmalinelabs.android:TLKit:17.4.22032800")
+    implementation("com.tourmalinelabs.android:TLKit:17.4.22050403")
 }
 ```
 
@@ -59,6 +59,7 @@ Also the SDK uses the following device features:
 You have to deal with the system to request permissions for
 - Location (precise and in background)
 - and Activity Recognition.
+
 Moreover you should ensure the user has switched off battery optimisation settings on his Android device. You can use that permission to be able to request the user from your app.
 
 ```xml
