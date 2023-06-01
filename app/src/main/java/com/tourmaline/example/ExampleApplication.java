@@ -1,5 +1,5 @@
 /* ******************************************************************************
- * Copyright 2017 Tourmaline Labs, Inc. All rights reserved.
+ * Copyright 2023 Tourmaline Labs, Inc. All rights reserved.
  * Confidential & Proprietary - Tourmaline Labs, Inc. ("TLI")
  *
  * The party receiving this software directly from TLI (the "Recipient")
@@ -23,349 +23,204 @@ package com.tourmaline.example;
 import android.app.Application;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.util.Log;
 
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 
-import com.tourmaline.context.ActivityEvent;
-import com.tourmaline.context.ActivityListener;
-import com.tourmaline.context.ActivityManager;
-import com.tourmaline.context.CompletionListener;
-import com.tourmaline.context.Engine;
-import com.tourmaline.context.Location;
-import com.tourmaline.context.LocationListener;
-import com.tourmaline.context.LocationManager;
-import com.tourmaline.context.NotificationInfo;
-import com.tourmaline.context.TelematicsEvent;
-import com.tourmaline.context.TelematicsEventListener;
-import com.tourmaline.example.helpers.Alerts;
-import com.tourmaline.example.helpers.Monitoring;
-
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-
+import com.tourmaline.apis.TLKit;
+import com.tourmaline.apis.listeners.TLAuthenticationListener;
+import com.tourmaline.apis.listeners.TLCompletionListener;
+import com.tourmaline.apis.listeners.TLDeviceCapabilityListener;
+import com.tourmaline.apis.listeners.TLKitDestroyListener;
+import com.tourmaline.apis.listeners.TLKitInitListener;
+import com.tourmaline.apis.listeners.TLKitSyncListener;
+import com.tourmaline.apis.objects.TLCloudArea;
+import com.tourmaline.apis.objects.TLDeviceCapability;
+import com.tourmaline.apis.objects.TLKitInitResult;
+import com.tourmaline.apis.objects.TLLaunchOptions;
+import com.tourmaline.apis.objects.TLMonitoringMode;
+import com.tourmaline.apis.objects.TLNotificationInfo;
+import com.tourmaline.apis.util.TLDigest;
+import com.tourmaline.apis.util.auth.TLAuthenticationResult;
 
 public class ExampleApplication extends Application {
     private static final String LOG_AREA = "ExampleApplication";
 
-    private static final String ApiKey    = "bdf760a8dbf64e35832c47d8d8dffcc0";
-    private static final String user      = %PUT_HERE_A_USER_IDENTIFIER%  //example: "androidexample@tourmalinelabs.com";
 
-    private ActivityListener activityListener;
-    private LocationListener locationListener;
-    private TelematicsEventListener telematicsListener;
-
-    private boolean gpsEnable=true;
-    public boolean isGpsEnable() {
-        return gpsEnable;
-    }
-    private boolean locationPermissionGranted=true;
-    public boolean isLocationPermissionGranted() {
-        return locationPermissionGranted;
-    }
-    private boolean activityRecognitionPermissionGranted=true;
-    public boolean isActivityRecognitionPermissionGranted() {
-        return activityRecognitionPermissionGranted;
-    }
-    private boolean powerSavingEnable=false;
-    public boolean isPowerSavingEnable() {
-        return powerSavingEnable;
-    }
-    private boolean batteryOptimisationEnable=true;
-    public boolean isBatteryOptimisationEnable() {
-        return batteryOptimisationEnable;
-    }
-    private boolean sdkUpToDate=true;
-    public boolean isSdkUpToDate() {
-        return sdkUpToDate;
-    }
+    // The apiKey provided to you by Tourmo
+    private static final String apiKey = "bdf760a8dbf64e35832c47d8d8dffcc0";
+    // The user identifier you want to use within TLKit
+    private static final String user   = %PUT_HERE_A_USER_IDENTIFIER%  //example: "androidexample@tourmalinelabs.com";
 
 
-    // initEngine() is invoked in 2 cases:
-    // - When the Start Monitoring Button in the MainActivity is clicked for the
-    // first time, to launch the engine,
-    // - When Engine.INIT_REQUIRED is triggered by the LocalBroadcastManager.
-    // This situation corresponds to the case where the application has quit
-    // (force quit, device reboot...) and the Engine need to restart so it must
-    // be initialized again.
-    public void initEngine(final boolean automaticMonitoring,
-                           final CompletionListener completionListener) {
-
-        //TLKit is a foreground service: here we set what is displayed into the
-        // device notification area
-
-        final String NOTIF_CHANNEL_ID = "background-run-notif-channel-id";
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            final NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            final NotificationChannel channel = new NotificationChannel(NOTIF_CHANNEL_ID, getText(R.string.foreground_notification_content_text), NotificationManager.IMPORTANCE_NONE);
-            channel.setShowBadge(false);
-            if(notificationManager!=null) {
-                notificationManager.createNotificationChannel(channel);
-            }
-        }
-
-        NotificationInfo note = new NotificationInfo(NOTIF_CHANNEL_ID,
-                getString(R.string.app_name),
-                getString(R.string.foreground_notification_content_text),
-                R.mipmap.ic_foreground_notification);
-
-        String hashedUserId = HashId( user );
-        Engine.Init(getApplicationContext(),
-                ApiKey,
-                hashedUserId,
-                automaticMonitoring? Engine.MonitoringMode.AUTOMATIC:Engine.MonitoringMode.MANUAL,
-                note,
-                null,
-                completionListener);
-
-    }
-
-    public void destroyEngine(final CompletionListener completionListener) {
-        if(activityListener!=null)  {
-            ActivityManager.UnregisterDriveListener(activityListener);
-            activityListener = null;
-        }
-        if(telematicsListener!=null)  {
-            ActivityManager.UnregisterTelematicsEventListener(telematicsListener);
-            telematicsListener = null;
-        }
-        if(locationListener!=null)  {
-            LocationManager.UnregisterLocationListener(locationListener);
-            locationListener = null;
-        }
-        Engine.Destroy(getApplicationContext(), completionListener);
-    }
+    // Preferences to store TLKit initialization state in case of app restart (reboot, update, crash...)
+    private SharedPreferences preferences;
+    final private String SHOULD_RESTART_TLKIT_AT_LAUNCH_KEY = "SHOULD_RESTART_TLKIT_AT_LAUNCH_KEY";
+    private boolean shouldRestartTLKitAtLaunch() { return preferences.getBoolean(SHOULD_RESTART_TLKIT_AT_LAUNCH_KEY, false); }
+    private void setShouldRestartTLKitAtLaunch(boolean started) { preferences.edit().putBoolean(SHOULD_RESTART_TLKIT_AT_LAUNCH_KEY, started).apply(); }
+    // Convenience for dispatching information into the main Activity
+    private final MutableLiveData<Boolean> tlKitInitialized = new MutableLiveData<>();
+    private final MutableLiveData<TLAuthenticationResult> authenticationResult = new MutableLiveData<>();
+    public LiveData<Boolean> isTLKitInitialized()  { return tlKitInitialized; }
+    public LiveData<TLAuthenticationResult> getAuthenticationResult() { return authenticationResult; }
 
     @Override
     public void onCreate() {
         super.onCreate();
 
-        // Want to attach the lifecycle broadcast listener to the application
-        // context since that is the only context guaranteed to last for full
-        // application lifetime
+        //Convenience
+        preferences = getSharedPreferences("tourmo", Context.MODE_PRIVATE);
+        tlKitInitialized.postValue(false);
+        authenticationResult.postValue(new TLAuthenticationResult(TLAuthenticationResult.State.none, ""));
 
-        final LocalBroadcastManager mgr = LocalBroadcastManager.getInstance(this);
-        mgr.registerReceiver(
-                new BroadcastReceiver() {
-                    @Override
-                    public void onReceive(Context context, Intent i) {
-                        int state = i.getIntExtra("state", Engine.INIT_SUCCESS);
-                        switch (state) {
-                            case Engine.INIT_SUCCESS: {
-                                Log.i(LOG_AREA, "ENGINE INIT SUCCESS");
-                                registerActivityListener();
-                                registerLocationListener();
-                                registerTelematicsListener();
-                                break;
+        // Call this function whenever the app is created
+        TLKit.OnApplicationCreate(getApplicationContext(),
+                new TLKitInitListener() {
+                    @Override public void onEngineInit(TLKitInitResult result) {
+                        // Initialization is already handled in the TLCompletionListener of the TLKit.Init()
+                    }
+                }, new TLDeviceCapabilityListener() {
+                    @Override public void onCapabilityUpdate(TLDeviceCapability capability) {
+                        if (capability.locationPermissionGranted) {
+                            Log.i(LOG_AREA, "locationPermissionGranted true");
+                            if (capability.gpsEnabled) {
+                                Log.i(LOG_AREA, "gpsEnabled true");
+                            } else {
+                                Log.e(LOG_AREA, "gpsEnabled false");
                             }
-                            case Engine.INIT_REQUIRED: {
-                                Log.i(LOG_AREA, "ENGINE INIT REQUIRED: Engine " +
-                                        "needs to restart in background...");
-                                final Monitoring.State monitoringState =
-                                        Monitoring.getState(getApplicationContext());
-                                final CompletionListener listener = new CompletionListener() {
-                                    @Override
-                                    public void OnSuccess() { }
-                                    @Override
-                                    public void OnFail(int i, String s) { }
-                                };
-                                switch (monitoringState) {
-                                    case AUTOMATIC:
-                                        initEngine(true, listener);
-                                        break;
-                                    case MANUAL:
-                                        initEngine(false, listener);
-                                        break;
-                                    default:
-                                        break;
-                                }
-                                break;
-                            }
-                            case Engine.INIT_FAILURE: {
-                                final String msg = i.getStringExtra("message");
-                                final int reason = i.getIntExtra("reason", 0);
-                                Log.e(LOG_AREA, "ENGINE INIT FAILURE" + reason + ": " + msg);
-                                break;
-                            }
-                            case Engine.GPS_ENABLED: {
-                                Log.i(LOG_AREA, "GPS_ENABLED");
-                                gpsEnable = true;
-                                Alerts.hide(getApplicationContext(), Alerts.Type.GPS);
-                                break;
-                            }
-                            case Engine.GPS_DISABLED: {
-                                Log.i(LOG_AREA, "GPS_DISABLED");
-                                gpsEnable = false;
-                                Alerts.show(getApplicationContext(), Alerts.Type.GPS);
-                                break;
-                            }
-                            case Engine.LOCATION_PERMISSION_GRANTED: {
-                                Log.i(LOG_AREA, "LOCATION_PERMISSION_GRANTED");
-                                //since there is no Android callback for this state, the SDK will be informed
-                                //only when it needs to get a new location, then it can take several
-                                //minutes for the notification to disappear
-                                locationPermissionGranted = true;
-                                Alerts.hide(getApplicationContext(), Alerts.Type.PERM_LOCATION);
-                                break;
-                            }
-                            case Engine.LOCATION_PERMISSION_DENIED: {
-                                Log.i(LOG_AREA, "LOCATION_PERMISSION_DENIED");
-                                //In that case Android OS restart the app automatically
-                                locationPermissionGranted = false;
-                                Alerts.show(getApplicationContext(), Alerts.Type.PERM_LOCATION);
-                                break;
-                            }
-                            case Engine.ACTIVITY_RECOGNITION_PERMISSION_GRANTED: {
-                                Log.i(LOG_AREA, "ACTIVITY_RECOGNITION_PERMISSION_GRANTED");
-                                activityRecognitionPermissionGranted = true;
-                                Alerts.hide(getApplicationContext(), Alerts.Type.PERM_MOTION);
-                                break;
-                            }
-                            case Engine.ACTIVITY_RECOGNITION_PERMISSION_DENIED: {
-                                Log.i(LOG_AREA, "ACTIVITY_RECOGNITION_PERMISSION_DENIED");
-                                activityRecognitionPermissionGranted = false;
-                                Alerts.show(getApplicationContext(), Alerts.Type.PERM_MOTION);
-                                break;
-                            }
-                            case Engine.POWER_SAVE_MODE_DISABLED: {
-                                Log.i(LOG_AREA, "POWER_SAVE_MODE_DISABLED");
-                                powerSavingEnable=false;
-                                Alerts.hide(getApplicationContext(), Alerts.Type.POWER);
-                                break;
-                            }
-                            case Engine.POWER_SAVE_MODE_ENABLED: {
-                                Log.i(LOG_AREA, "POWER_SAVE_MODE_ENABLED");
-                                powerSavingEnable = true;
-                                Alerts.show(getApplicationContext(), Alerts.Type.POWER);
-                                break;
-                            }
-                            case Engine.BATTERY_OPTIMIZATION_DISABLED: {
-                                Log.i(LOG_AREA, "BATTERY_OPTIMIZATION_DISABLED");
-                                batteryOptimisationEnable=false;
-                                break;
-                            }
-                            case Engine.BATTERY_OPTIMIZATION_ENABLED: {
-                                Log.i(LOG_AREA, "BATTERY_OPTIMIZATION_ENABLED");
-                                batteryOptimisationEnable=true;
-                                break;
-                            }
-                            case Engine.BATTERY_OPTIMIZATION_UNKNOWN: {
-                                Log.i(LOG_AREA, "BATTERY_OPTIMIZATION_UNKNOWN");
-                                break;
-                            }
-                            case Engine.SDK_UP_TO_DATE: {
-                                Log.i(LOG_AREA, "SDK_UP_TO_DATE");
-                                sdkUpToDate = true;
-                                break;
-                            }
-                            case Engine.SDK_UPDATE_MANDATORY: {
-                                Log.i(LOG_AREA, "SDK_UPDATE_MANDATORY");
-                                sdkUpToDate = false;
-                                break;
-                            }
-                            case Engine.SDK_UPDATE_AVAILABLE: {
-                                Log.i(LOG_AREA, "SDK_UPDATE_AVAILABLE");
-                                sdkUpToDate = false;
-                                break;
-                            }
-                            case Engine.SYNCHRONIZED: {
-                                //All records have been processed and sent to the backend
-                                Log.i(LOG_AREA, "SYNCHRONIZED");
-                            }
+                        } else {
+                            Log.e(LOG_AREA, "locationPermissionGranted false");
+                        }
+                        if (capability.activityPermissionGranted) {
+                            Log.i(LOG_AREA, "activityPermissionGranted true");
+                        } else {
+                            Log.e(LOG_AREA, "activityPermissionGranted false");
+                        }
+                        if (capability.powerSavingEnabled) {
+                            Log.e(LOG_AREA, "powerSavingEnabled true");
+                        } else {
+                            Log.i(LOG_AREA, "powerSavingEnabled false");
+                        }
+                        if (capability.batteryOptimisationEnabled) {
+                            Log.e(LOG_AREA, "batteryOptimisationEnabled true");
+                        } else {
+                            Log.i(LOG_AREA, "batteryOptimisationEnabled false");
                         }
                     }
-                },
-                new IntentFilter(Engine.ACTION_LIFECYCLE));
-    }
+                }, new TLKitSyncListener() {
+                    @Override public void onEngineSynchronized() {
+                        //All records have been processed and sent to our infrastructure
+                        Log.i(LOG_AREA, "TLKit is synchronized");
+                    }
+                });
 
-    //Drive monitoring
-    private void registerActivityListener() {
-        activityListener = new ActivityListener() {
-            @Override
-            public void OnEvent(ActivityEvent activityEvent) {
-                Log.i(LOG_AREA, "Activity Listener: new event");
-            }
-
-            @Override
-            public void RegisterSucceeded() {
-                Log.i(LOG_AREA, "Activity Listener: register success");
-            }
-
-            @Override
-            public void RegisterFailed(int i) {
-                Log.e(LOG_AREA, "Activity Listener: register failure");
-            }
-        };
-        ActivityManager.RegisterDriveListener(activityListener);
-    }
-
-    //Telematics monitoring
-    private void registerTelematicsListener() {
-        telematicsListener = new TelematicsEventListener() {
-            @Override
-            public void OnEvent(TelematicsEvent e) {
-                Log.d( LOG_AREA, "Got telematics event: " + e.getTripId() +
-                        ", " + e.getTime() + ", " + e.getDuration() );
-            }
-
-            @Override
-            public void RegisterSucceeded() {
-                Log.d(LOG_AREA, "startTelematicsListener OK");
-            }
-
-            @Override
-            public void RegisterFailed(int i) {
-                Log.d(LOG_AREA, "startTelematicsListener KO: " + i);
-            }
-        };
-        ActivityManager.RegisterTelematicsEventListener(telematicsListener);
-    }
-
-    //Location monitoring
-    private void registerLocationListener() {
-        locationListener = new LocationListener() {
-            @Override
-            public void OnLocationUpdated(Location location) {
-                Log.i(LOG_AREA, "Location Listener: new location");
-            }
-
-            @Override
-            public void RegisterSucceeded() {
-                Log.i(LOG_AREA, "Location Listener: register success");
-            }
-
-            @Override
-            public void RegisterFailed(int i) {
-                Log.e(LOG_AREA, "Location Listener: register failure");
-            }
-        };
-        LocationManager.RegisterLocationListener(locationListener);
-    }
-
-    /**
-     * Calculate the SHA256 digest of a string and return hexadecimal string
-     * representation of digest.
-     *
-     * @param str String to be digested.
-     * @return String digest as a hexadecimal string
-     */
-    private String HashId(String str){
-        String result = "";
-        try {
-            final MessageDigest digester = MessageDigest.getInstance("SHA-256");
-            digester.reset();
-            byte[] dig = digester.digest(str.getBytes());
-            result = String.format("%0" + (dig.length*2) + "X", new BigInteger( 1, dig) ).toUpperCase();
-        } catch (NoSuchAlgorithmException e) {
-            Log.e( LOG_AREA, "No SHA 256 wtf");
+        // That is very important to call TLKit.Init(...) as quickly as possible to ensure that the
+        // keep alive mechanism is effectively set before Android OS decides to kill the app.
+        // You must not defer the initialization because you need a network response or you wait another thread to dispatch some information.
+        // You must call TLKit.Init(...) synchronously in the onCreate() method of the Application class.
+        // It is the integrator responsibility to know if TLKit was previously running.
+        if(shouldRestartTLKitAtLaunch()) {
+            initTLKit();
         }
-        return  result;
     }
 
+    public void initTLKit() {
+
+        if (TLKit.IsInitialized()) {
+            return;
+        }
+
+        // Build the hash id for login
+        String hashedUserId = TLDigest.Sha256(user);
+
+        // TLKit is a foreground service, it means there is a permanent notification displayed on the device,
+        // here we set what is displayed
+        final String NOTIF_CHANNEL_ID = "background-run-notif-channel-id";
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            NotificationChannel channel = new NotificationChannel(NOTIF_CHANNEL_ID,
+                    getText(R.string.foreground_notification_channel_title),
+                    NotificationManager.IMPORTANCE_LOW);
+            channel.setShowBadge(false);
+            if(notificationManager!=null) {
+                notificationManager.createNotificationChannel(channel);
+            }
+        }
+        TLNotificationInfo notificationInfo = new TLNotificationInfo(NOTIF_CHANNEL_ID,
+                getString(R.string.app_name),
+                getString(R.string.foreground_notification_content_text),
+                R.mipmap.ic_foreground_notification);
+
+        TLAuthenticationListener authListener = new TLAuthenticationListener() {
+            @Override public void OnUpdateState(TLAuthenticationResult result) {
+                authenticationResult.postValue(result);
+                switch (result.state) {
+                    case none:
+                        Log.i(LOG_AREA, "TLKit authentication none");
+                        break;
+                    case authenticated:
+                        Log.i(LOG_AREA, "TLKit authentication authenticated");
+                        break;
+                    case pwd_expired:
+                        Log.e(LOG_AREA, "TLKit authentication pwd_expired");
+                        break;
+                    case invalid_credentials:
+                        Log.e(LOG_AREA, "TLKit authentication invalid_credentials");
+                        break;
+                    case user_disabled:
+                        Log.e(LOG_AREA, "TLKit authentication user_disabled");
+                        break;
+                    case unactivated:
+                        Log.e(LOG_AREA, "TLKit authentication unactivated");
+                        break;
+                    default:
+                        Log.e(LOG_AREA, "TLKit authentication error: " + result.message);
+                        break;
+                }
+            }
+        };
+
+        TLCompletionListener completionListener = new TLCompletionListener() {
+            @Override public void OnSuccess() {
+                Log.i(LOG_AREA, "TLKit Init() success");
+                setShouldRestartTLKitAtLaunch(true);
+                tlKitInitialized.postValue(true);
+            }
+            @Override public void OnFail(int i, String s) {
+                Log.e(LOG_AREA, "TLKit Init() error: " + i + " - "+ s);
+            }
+        };
+
+        TLLaunchOptions options = new TLLaunchOptions();
+        options.setFirstName("Bob");
+        options.setLastName("Smith");
+        //options.setExternalId("my-company-identifier-xyz");
+        //options.addGroupExternalIds(123, new String[]{"team_blue", "team_green"});
+
+        TLKit.Init(getApplicationContext(),
+                apiKey,
+                TLCloudArea.US,
+                hashedUserId,
+                authListener,
+                TLMonitoringMode.AUTOMATIC,
+                notificationInfo,
+                options,
+                completionListener);
+    }
+
+    public void destroyTLKit() {
+        TLKit.Destroy(getApplicationContext(), new TLKitDestroyListener() {
+            @Override
+            public void OnDestroyed() {
+                Log.i(LOG_AREA, "TLKit destroyed");
+                setShouldRestartTLKitAtLaunch(false);
+                tlKitInitialized.postValue(false);
+                authenticationResult.postValue(new TLAuthenticationResult(TLAuthenticationResult.State.none, ""));
+            }
+        });
+    }
 }

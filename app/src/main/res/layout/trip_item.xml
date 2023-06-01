@@ -12,7 +12,7 @@
         android:id="@+id/id_text_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="left"
+        android:gravity="start"
         android:singleLine="true"
         android:ellipsize="middle"
         android:textColor="@color/black" />
@@ -96,18 +96,5 @@
         android:singleLine="true"
         android:ellipsize="middle"
         android:textColor="@color/black"/>
-
-    <Button
-        android:id="@+id/stop_monitoring_button"
-        android:layout_width="wrap_content"
-        android:layout_height="26dip"
-        android:layout_marginRight="10dip"
-        android:layout_gravity="right"
-        android:paddingLeft="10dip"
-        android:paddingRight="10dip"
-        android:paddingTop="2dip"
-        android:paddingBottom="2dip"
-        android:text="@string/stop_this_drive"
-        android:textSize="12sp" />
 
 </LinearLayout>

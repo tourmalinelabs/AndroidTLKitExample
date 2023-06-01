@@ -1,49 +1,69 @@
 <resources>
-    <string name="app_name">TLExample</string>
+    <string name="app_name">TLKitExample</string>
 
-    <string name="context_engine">TLKit</string>
-    <string name="tlkit_state">TLKit state:</string>
-    <string name="automatic_monitoring">Automatic Monitoring</string>
-    <string name="manual_monitoring">Manual Monitoring</string>
-    <string name="not_monitoring">Not monitoring</string>
-    <string name="start_automatic_monitoring">Start Automatic Monitoring</string>
-    <string name="start_manual_monitoring">Start Manual Monitoring</string>
+    <string name="tlkit">TLKIT</string>
+    <string name="permissions">PERMISSIONS</string>
+    <string name="monitoring_apis">MONITORING APIS</string>
+    <string name="tlkit_version">TLKit Version: %1$s</string>
+    <string name="monitoring_mode">Monitoring mode: %1$s</string>
+    <string name="authentication_status">Authentication status: %1$s</string>
+    <string name="automatic_monitoring">automatic</string>
+    <string name="start_monitoring">Start Monitoring</string>
     <string name="stop_monitoring">Stop Monitoring</string>
-    <string name="start_new_drive">Start a new drive</string>
-    <string name="stop_this_drive">Stop this drive</string>
-    <string name="monitoring_apis">Monitoring API\'s</string>
-    <string name="drives">Drives</string>
+    <string name="trips">Trips</string>
     <string name="locations">Locations</string>
     <string name="telematics">Telematics</string>
     <string name="telematics_last_trip">Telematics (last trip)</string>
-    <string name="title_activity_drives">DrivesActivity</string>
+    <string name="title_activity_trips">TripsActivity</string>
+    <string name="title_activity_monitoring_permissions">PermissionsActivity</string>
     <string name="no_data">No data</string>
     <string name="title_activity_locations">LocationsActivity</string>
     <string name="title_activity_telematics">telematicsActivity</string>
     <string name="please_wait">Please wait&#8230;</string>
 
-    <string name="drive_item_id">ID: %1$s</string>
-    <string name="drive_item_event_type">Event type: %1$s</string>
-    <string name="drive_item_state">State: %1$s</string>
-    <string name="drive_item_analysis_state">Analysis state: %1$s</string>
-    <string name="drive_item_distance">Distance: %1$s</string>
-    <string name="drive_item_start_time">Start time: %1$s</string>
-    <string name="drive_item_end_time">End time: %1$s</string>
-    <string name="drive_item_start_loc">Start loc: %1$s</string>
-    <string name="drive_item_end_loc">End loc: %1$s</string>
-    <string name="drive_item_start_add">Start add: %1$s</string>
-    <string name="drive_item_end_add">end add: %1$s</string>
+    <string name="trip_item_id">ID: %1$s</string>
+    <string name="trip_item_event_type">Event type: %1$s</string>
+    <string name="trip_item_state">State: %1$s</string>
+    <string name="trip_item_analysis_state">Analysis state: %1$s</string>
+    <string name="trip_item_distance">Distance: %1$s</string>
+    <string name="trip_item_start_time">Start time: %1$s</string>
+    <string name="trip_item_end_time">End time: %1$s</string>
+    <string name="trip_item_start_loc">Start loc: %1$s</string>
+    <string name="trip_item_end_loc">End loc: %1$s</string>
+    <string name="trip_item_start_add">Start add: %1$s</string>
+    <string name="trip_item_end_add">end add: %1$s</string>
 
-    <!--Notifications-->
+    <!--Permissions-->
+    <string name="monitoring_permission_title">Check Permissions</string>
+    <string name="monitoring_permission_subtitle">Let\’s get started with the following permissions to reliably detect trip details like start, end, and locations, as well as identify habitual driving behaviors.</string>
+    <string name="monitoring_permission_location_title">Locations</string>
+    <string name="monitoring_permission_location_subtitle">This permission allows your device to capture and pass location details to this application. <b>\"Precise\"</b> locations should be enabled <b>\"While using the app\"</b>, so each trip can be reliably recorded.</string>
+    <string name="monitoring_permission_location_button_grant">Grant permission</string>
+    <string name="monitoring_permission_location_button_granted">Granted</string>
+    <string name="monitoring_permission_background_title">Locations in Background</string>
+    <string name="monitoring_permission_background_subtitle">If you are asked about background locations, please <b>\"Allow All the time\"</b>. As a default, this application runs in the background, saving battery life and giving insights you care about easily.</string>
+    <string name="monitoring_permission_background_button_grant">Grant permission</string>
+    <string name="monitoring_permission_background_button_granted">Granted</string>
+    <string name="monitoring_permission_recognition_title">Activity</string>
+    <string name="monitoring_permission_recognition_subtitle">Allow this permission to minimize battery usage, which enables the use physical motion to help detect starts and ends of trips.</string>
+    <string name="monitoring_permission_recognition_button_grant">Grant permission</string>
+    <string name="monitoring_permission_recognition_button_granted">Granted</string>
+    <string name="monitoring_permission_battery_title">Battery Optimization</string>
+    <string name="monitoring_permission_battery_subtitle">This app has built-in battery optimization, keeping your battery charged for as long as possible while ensuring the right data is collected at the right time.  Disable any extra battery optimization for this app on your device here.</string>
+    <string name="monitoring_permission_battery_button_unset">Remove battery optimisation</string>
+    <string name="monitoring_permission_battery_button_set">off</string>
+    <string name="monitoring_permission_skip_button">Back</string>
+    <string name="monitoring_permission_granted">granted</string>
+    <string name="monitoring_permission_not_granted">not granted</string>
+
+    <!--Notification-->
     <string name="foreground_notification_content_text">Automatically detecting and logging your travels for driving score computation.</string>
     <string name="foreground_notification_channel_title">Background run</string>
     <string name="gps_notif_title">GPS off</string>
-    <string name="gps_notif_text">can\'t work.</string>
     <string name="permission_notif_title">Location Permission denied</string>
     <string name="permission_notif_text">can\'t work.</string>
     <string name="motion_notif_title">Activity Motion Permission denied</string>
     <string name="motion_notif_text">may not work optimally.</string>
     <string name="power_notif_title">Power saving mode activated</string>
-    <string name="power_notif_text">can\'t work efficiently.</string>
 
 </resources>

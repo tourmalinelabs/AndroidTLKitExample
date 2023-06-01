@@ -1,5 +1,5 @@
 /* ******************************************************************************
- * Copyright 2017 Tourmaline Labs, Inc. All rights reserved.
+ * Copyright 2023 Tourmaline Labs, Inc. All rights reserved.
  * Confidential & Proprietary - Tourmaline Labs, Inc. ("TLI")
  *
  * The party receiving this software directly from TLI (the "Recipient")
@@ -29,11 +29,11 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.tourmaline.context.ActivityManager;
-import com.tourmaline.context.Drive;
-import com.tourmaline.context.QueryHandler;
-import com.tourmaline.context.TelematicsEvent;
-import com.tourmaline.context.TelematicsEventListener;
+import com.tourmaline.apis.TLActivityManager;
+import com.tourmaline.apis.listeners.TLQueryListener;
+import com.tourmaline.apis.listeners.TLTelematicsEventListener;
+import com.tourmaline.apis.objects.TLTelematicsEvent;
+import com.tourmaline.apis.objects.TLTrip;
 import com.tourmaline.example.R;
 import com.tourmaline.example.adapters.DisplayableTelematics;
 import com.tourmaline.example.adapters.TelematicsAdapter;
@@ -46,14 +46,14 @@ import java.util.Date;
 public class TelematicsActivity extends Activity {
     private static final String LOG_AREA = "TelematicsActivity";
 
-    private TelematicsEventListener telematicsEventListener;
+    private TLTelematicsEventListener telematicsEventListener;
     private TelematicsAdapter telematicsAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView( R.layout.activity_telematics);
-        telematicsAdapter = new TelematicsAdapter(TelematicsActivity.this, new ArrayList<DisplayableTelematics>());
+        telematicsAdapter = new TelematicsAdapter(TelematicsActivity.this, new ArrayList<>());
         updateTelematics();
     }
 
@@ -71,9 +71,9 @@ public class TelematicsActivity extends Activity {
 
     private void registerTelematicsListener() {
         if(telematicsEventListener==null) {
-            telematicsEventListener = new TelematicsEventListener() {
+            telematicsEventListener = new TLTelematicsEventListener() {
                 @Override
-                public void OnEvent(TelematicsEvent event) {
+                public void OnEvent(TLTelematicsEvent event) {
                     Log.i(LOG_AREA, "Telematics Listener: new event");
                     addEvent(event);
                 }
@@ -89,12 +89,12 @@ public class TelematicsActivity extends Activity {
                 }
             };
         }
-        ActivityManager.RegisterTelematicsEventListener(telematicsEventListener);
+        TLActivityManager.ListenForTelematicsEvents(telematicsEventListener);
     }
 
     private void unregisterTelematicsListener() {
         if(telematicsEventListener!=null) {
-            ActivityManager.UnregisterTelematicsEventListener(telematicsEventListener);
+            TLActivityManager.StopListeningForTelematicsEvents(telematicsEventListener);
             telematicsEventListener = null;
         }
     }
@@ -107,17 +107,17 @@ public class TelematicsActivity extends Activity {
         calendar.add(Calendar.DATE, -30);
         final Date startTime = calendar.getTime();
 
-        ActivityManager.GetDrives(startTime, endTime, 1, new QueryHandler<ArrayList<Drive>>() {
+        TLActivityManager.QueryTrips(startTime, endTime, 1, new TLQueryListener<ArrayList<TLTrip>>() {
             @Override
-            public void Result(ArrayList<Drive> drives) {
+            public void Result(ArrayList<TLTrip> trips) {
 
-                if(drives.isEmpty()) {
+                if(trips.isEmpty()) {
                     showNoData();
                     Progress.dismiss(TelematicsActivity.this);
                 } else {
-                    ActivityManager.GetTripTelematicsEvents(drives.get(0).Id().toString(), new QueryHandler<ArrayList<TelematicsEvent>>() {
+                    TLActivityManager.QueryTripTelematicsEvents(trips.get(0).Id().toString(), new TLQueryListener<ArrayList<TLTelematicsEvent>>() {
                         @Override
-                        public void Result(ArrayList<TelematicsEvent> events) {
+                        public void Result(ArrayList<TLTelematicsEvent> events) {
                             if (events != null && !events.isEmpty()) {
                                 Log.i(LOG_AREA, events.size() + " recorded telematics: ");
                                 showData(events);
@@ -153,60 +153,45 @@ public class TelematicsActivity extends Activity {
 
     }
 
-    private void showData(final ArrayList<TelematicsEvent> events) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-
-                if(events!=null) {
-                    telematicsAdapter.clear();
-                    for(TelematicsEvent event : events) {
-                        telematicsAdapter.add(new DisplayableTelematics(getApplicationContext(), event));
-                    }
-                    telematicsAdapter.sort(DisplayableTelematics.COMPARATOR_REVERSED);
+    private void showData(final ArrayList<TLTelematicsEvent> events) {
+        runOnUiThread(() -> {
+            if(events!=null) {
+                telematicsAdapter.clear();
+                for(TLTelematicsEvent event : events) {
+                    telematicsAdapter.add(new DisplayableTelematics(getApplicationContext(), event));
                 }
-                final ListView locationsListView = findViewById(R.id.telematics_list);
-                final TextView noDataTextView = findViewById(R.id.no_data_text_view);
-                locationsListView.setAdapter(telematicsAdapter);
-                noDataTextView.setVisibility(View.GONE);
-                locationsListView.setVisibility(View.VISIBLE);
+                telematicsAdapter.sort(DisplayableTelematics.COMPARATOR_REVERSED);
             }
+            final ListView locationsListView = findViewById(R.id.telematics_list);
+            final TextView noDataTextView = findViewById(R.id.no_data_text_view);
+            locationsListView.setAdapter(telematicsAdapter);
+            noDataTextView.setVisibility(View.GONE);
+            locationsListView.setVisibility(View.VISIBLE);
         });
     }
 
     private void showNoData() {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                final ListView locationsListView = findViewById(R.id.telematics_list);
-                final TextView noDataTextView = findViewById(R.id.no_data_text_view);
-                noDataTextView.setText(getResources().getString(R.string.no_data));
-                noDataTextView.setVisibility(View.VISIBLE);
-                locationsListView.setVisibility(View.GONE);
-            }
+        runOnUiThread(() -> {
+            final ListView locationsListView = findViewById(R.id.telematics_list);
+            final TextView noDataTextView = findViewById(R.id.no_data_text_view);
+            noDataTextView.setText(getResources().getString(R.string.no_data));
+            noDataTextView.setVisibility(View.VISIBLE);
+            locationsListView.setVisibility(View.GONE);
         });
     }
 
     private void showError(final String error) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(TelematicsActivity.this, error, Toast.LENGTH_LONG).show();
-            }
-        });
+        runOnUiThread(() -> Toast.makeText(TelematicsActivity.this, error, Toast.LENGTH_LONG).show());
     }
 
-    private void addEvent(final TelematicsEvent event) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if(event==null) return;
-                final DisplayableTelematics displayable = new DisplayableTelematics(getApplicationContext(), event);
-                telematicsAdapter.add(displayable);
-                telematicsAdapter.sort(DisplayableTelematics.COMPARATOR_REVERSED);
-                telematicsAdapter.notifyDataSetChanged();
-                showData(null);
-            }
+    private void addEvent(final TLTelematicsEvent event) {
+        runOnUiThread(() -> {
+            if(event==null) return;
+            final DisplayableTelematics displayable = new DisplayableTelematics(getApplicationContext(), event);
+            telematicsAdapter.add(displayable);
+            telematicsAdapter.sort(DisplayableTelematics.COMPARATOR_REVERSED);
+            telematicsAdapter.notifyDataSetChanged();
+            showData(null);
         });
     }
 }

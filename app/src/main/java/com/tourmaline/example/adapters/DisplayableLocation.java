@@ -1,5 +1,5 @@
 /* ******************************************************************************
- * Copyright 2017 Tourmaline Labs, Inc. All rights reserved.
+ * Copyright 2023 Tourmaline Labs, Inc. All rights reserved.
  * Confidential & Proprietary - Tourmaline Labs, Inc. ("TLI")
  *
  * The party receiving this software directly from TLI (the "Recipient")
@@ -23,19 +23,19 @@ package com.tourmaline.example.adapters;
 import android.content.Context;
 import android.text.format.DateUtils;
 
-import com.tourmaline.context.Location;
+import com.tourmaline.apis.objects.TLLocation;
 
 import java.text.DecimalFormat;
 import java.util.Comparator;
 
 public class DisplayableLocation {
-    private String position;
-    private String time;
-    private String address;
-    private String state;
-    private long timestamp;
+    final private String address;
+    final private String position;
+    final private String state;
+    final private String time;
+    final private long timestamp;
 
-    public DisplayableLocation(final Context context, final Location location) {
+    public DisplayableLocation(final Context context, final TLLocation location) {
         final DecimalFormat posFormat = new DecimalFormat("0.0000");
         this.position = "Location: (" + posFormat.format(location.lat) + "|" + posFormat.format(location.lng) + ")";
         final int formatFlags = DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_ABBREV_MONTH| DateUtils.FORMAT_NO_YEAR;
@@ -62,11 +62,8 @@ public class DisplayableLocation {
     }
 
     //Utility
-    public static final Comparator<DisplayableLocation> COMPARATOR_REVERSED = new Comparator<DisplayableLocation>() {
-        @Override
-        public int compare(DisplayableLocation o1, DisplayableLocation o2) {
-            final long diff = o2.timestamp-o1.timestamp;
-            return (diff==0)?0:((diff>0)?1:-1);
-        }
+    public static final Comparator<DisplayableLocation> COMPARATOR_REVERSED = (o1, o2) -> {
+        final long diff = o2.timestamp-o1.timestamp;
+        return (diff==0)?0:((diff>0)?1:-1);
     };
 }
