@@ -1,5 +1,5 @@
 /* ******************************************************************************
- * Copyright 2017 Tourmaline Labs, Inc. All rights reserved.
+ * Copyright 2023 Tourmaline Labs, Inc. All rights reserved.
  * Confidential & Proprietary - Tourmaline Labs, Inc. ("TLI")
  *
  * The party receiving this software directly from TLI (the "Recipient")
@@ -33,29 +33,23 @@ public class Progress {
 
     public static void show(final Activity activity) {
         if(activity==null) return;
-        activity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if(progress!=null) {
-                    progress.dismiss();
-                    progress = null;
-                }
-                progress = new ProgressDialog(activity);
-                progress.setMessage(activity.getResources().getString(R.string.please_wait));
-                progress.show();
+        activity.runOnUiThread(() -> {
+            if(progress!=null) {
+                progress.dismiss();
+                progress = null;
             }
+            progress = new ProgressDialog(activity);
+            progress.setMessage(activity.getResources().getString(R.string.please_wait));
+            progress.show();
         });
     }
 
     public static void dismiss(final Activity activity) {
         if(activity==null) return;
-        activity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if(progress!=null) {
-                    progress.dismiss();
-                    progress = null;
-                }
+        activity.runOnUiThread(() -> {
+            if(progress!=null) {
+                progress.dismiss();
+                progress = null;
             }
         });
     }

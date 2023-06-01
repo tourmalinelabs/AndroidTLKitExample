@@ -1,5 +1,5 @@
 /* ******************************************************************************
- * Copyright 2017 Tourmaline Labs, Inc. All rights reserved.
+ * Copyright 2023 Tourmaline Labs, Inc. All rights reserved.
  * Confidential & Proprietary - Tourmaline Labs, Inc. ("TLI")
  *
  * The party receiving this software directly from TLI (the "Recipient")
@@ -18,7 +18,6 @@
  * application of any third party copyright notice to that third party's
  * code.
  ******************************************************************************/
-
 package com.tourmaline.example.adapters;
 
 
@@ -77,6 +76,9 @@ public class TelematicsAdapter extends ArrayAdapter<DisplayableTelematics> {
 
     private void updateLocationItemView(final View view, final DisplayableTelematics displayable) {
         final ViewHolder viewHolder = (ViewHolder) view.getTag();
+        if(displayable == null) {
+            return;
+        }
         viewHolder.textViewTripId.setText(displayable.getTripId());
         viewHolder.textViewType.setText(displayable.getType());
         viewHolder.textViewPosition.setText(displayable.getPosition());

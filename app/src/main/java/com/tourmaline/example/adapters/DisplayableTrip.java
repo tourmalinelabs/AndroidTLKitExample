@@ -1,5 +1,5 @@
 /* ******************************************************************************
- * Copyright 2017 Tourmaline Labs, Inc. All rights reserved.
+ * Copyright 2023 Tourmaline Labs, Inc. All rights reserved.
  * Confidential & Proprietary - Tourmaline Labs, Inc. ("TLI")
  *
  * The party receiving this software directly from TLI (the "Recipient")
@@ -23,42 +23,41 @@ package com.tourmaline.example.adapters;
 import android.content.Context;
 import android.text.format.DateUtils;
 
-import com.tourmaline.context.Drive;
-import com.tourmaline.context.Point;
+import com.tourmaline.apis.objects.TLPoint;
+import com.tourmaline.apis.objects.TLTrip;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.UUID;
 
-public class DisplayableDrive {
-    private UUID id;
-    private String activityEventType;
-    private String driveState;
-    private String driveAnalysisState;
-    private String distance;
-    private String startTime;
-    private String endTime;
-    private String startLocation;
-    private String endLocation;
-    private String startAddress;
-    private String endAddress;
-    private boolean monitoring;
-    private long startTimestamp;
+public class DisplayableTrip {
 
-    public DisplayableDrive(final Context context, final Drive drive, final boolean monitoring, final String activityEventType) {
-        this.id = drive.Id();
+    private final String activityEventType;
+    private final String distance;
+    private final String analysisState;
+    private final String tripState;
+    private String endAddress;
+    private String endLocation;
+    private final String endTime;
+    private final UUID id;
+    private String startAddress;
+    private String startLocation;
+    private final String startTime;
+    private final long startTimestamp;
+
+    public DisplayableTrip(final Context context, final TLTrip trip, final String activityEventType) {
+        this.id = trip.Id();
         this.activityEventType = activityEventType;
-        this.driveState = drive.StateStr();
-        this.driveAnalysisState = drive.AnalysisStateStr();
-        this.monitoring = monitoring;
-        this.startTimestamp = drive.StartTime();
+        this.tripState = trip.StateStr();
+        this.analysisState = trip.AnalysisStateStr();
+        this.startTimestamp = trip.StartTime();
         final DecimalFormat numberFormat = new DecimalFormat("0.000");
-        this.distance = numberFormat.format(drive.Distance()/1000.0f) + " km";
+        this.distance = numberFormat.format(trip.Distance()/1000.0f) + " km";
         final int formatFlags = DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_ABBREV_MONTH| DateUtils.FORMAT_NO_YEAR;
-        this.startTime = DateUtils.formatDateTime(context, drive.StartTime(), formatFlags);
-        this.endTime = DateUtils.formatDateTime(context, drive.EndTime(), formatFlags);
-        final ArrayList<Point> locations = drive.Locations();
+        this.startTime = DateUtils.formatDateTime(context, trip.StartTime(), formatFlags);
+        this.endTime = DateUtils.formatDateTime(context, trip.EndTime(), formatFlags);
+        final ArrayList<TLPoint> locations = trip.Locations();
         this.startLocation = this.endLocation = "empty";
         final DecimalFormat positionFormat = new DecimalFormat("0.0000");
         if(locations!=null && locations.size()>1) {
@@ -67,11 +66,11 @@ public class DisplayableDrive {
         }
 
         this.startAddress = this.endAddress = "empty";
-        if(drive.StartAddress()!=null) {
-            this.startAddress = drive.StartAddress();
+        if(trip.StartAddress()!=null) {
+            this.startAddress = trip.StartAddress();
         }
-        if(drive.EndAddress()!=null) {
-            this.endAddress = drive.EndAddress();
+        if(trip.EndAddress()!=null) {
+            this.endAddress = trip.EndAddress();
         }
     }
 
@@ -84,16 +83,12 @@ public class DisplayableDrive {
         return activityEventType;
     }
 
-    String getDriveState() {
-        return driveState;
+    String getTripState() {
+        return tripState;
     }
 
-    String getDriveAnalysisState() {
-        return driveAnalysisState;
-    }
-
-    boolean isMonitoring() {
-        return monitoring;
+    String getAnalysisState() {
+        return analysisState;
     }
 
     String getDistance() {
@@ -125,11 +120,8 @@ public class DisplayableDrive {
     }
 
     //Utility
-    public static final Comparator<DisplayableDrive> COMPARATOR_REVERSED = new Comparator<DisplayableDrive>() {
-        @Override
-        public int compare(DisplayableDrive o1, DisplayableDrive o2) {
-            final long diff = o2.startTimestamp-o1.startTimestamp;
-            return (diff==0)?0:((diff>0)?1:-1);
-        }
+    public static final Comparator<DisplayableTrip> COMPARATOR_REVERSED = (o1, o2) -> {
+        final long diff = o2.startTimestamp-o1.startTimestamp;
+        return (diff==0)?0:((diff>0)?1:-1);
     };
 }

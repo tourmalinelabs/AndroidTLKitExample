@@ -1,5 +1,5 @@
 /* ******************************************************************************
- * Copyright 2017 Tourmaline Labs, Inc. All rights reserved.
+ * Copyright 2023 Tourmaline Labs, Inc. All rights reserved.
  * Confidential & Proprietary - Tourmaline Labs, Inc. ("TLI")
  *
  * The party receiving this software directly from TLI (the "Recipient")
@@ -18,48 +18,47 @@
  * application of any third party copyright notice to that third party's
  * code.
  ******************************************************************************/
-
 package com.tourmaline.example.adapters;
 
 import android.content.Context;
 import android.text.format.DateUtils;
 
-import com.tourmaline.context.TelematicsEvent;
+import com.tourmaline.apis.objects.TLTelematicsEvent;
 
 import java.text.DecimalFormat;
 import java.util.Comparator;
 
 
 public class DisplayableTelematics {
-    private String tripId;
-    private String type;
-    private String position;
-    private String time;
-    private String duration;
-    private String speed;
-    private String severity;
-    private long timestamp;
+    final private String duration;
+    final private String position;
+    final private String severity;
+    final private String speed;
+    final private String time;
+    final private long timestamp;
+    final private String tripId;
+    final private String type;
 
-    public DisplayableTelematics(final Context context, final TelematicsEvent event) {
-        this.tripId = event.getTripId();
-        this.type = "Type: UNKNOWN";
-        switch (event.getType()) {
+    public DisplayableTelematics(final Context context, final TLTelematicsEvent event) {
+        this.tripId = event.TripId();
+
+        switch (event.Type()) {
             case ACCEL: this.type = "Type: ACCEL"; break;
             case BRAKE: this.type = "Type: BRAKE"; break;
             case LEFT:  this.type = "Type: LEFT"; break;
             case RIGHT: this.type = "Type: RIGHT"; break;
             case PHONE: this.type = "Type: PHONE"; break;
             case SPEED: this.type = "Type: SPEED"; break;
-            default: break;
+            default:    this.type = "Type: UNKNOWN"; break;
         }
         final DecimalFormat posFormat = new DecimalFormat("0.0000");
-        this.position = "Location: (" + posFormat.format(event.getLatitude()) + "|" + posFormat.format(event.getLongitude()) + ")";
+        this.position = "Location: (" + posFormat.format(event.Latitude()) + "|" + posFormat.format(event.Longitude()) + ")";
         final int formatFlags = DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_ABBREV_MONTH | DateUtils.FORMAT_NO_YEAR;
-        this.time = "Time: " + DateUtils.formatDateTime(context, event.getTime(), formatFlags);
-        this.duration = "Duration: " + event.getDuration() + " ms";
-        this.speed = "Speed: " + event.getSpeed();
-        this.severity = "Severity: " + event.getSeverity();
-        this.timestamp = event.getTime();
+        this.time = "Time: " + DateUtils.formatDateTime(context, event.Time(), formatFlags);
+        this.duration = "Duration: " + event.Duration() + " ms";
+        this.speed = "Speed: " + event.Speed();
+        this.severity = "Severity: " + event.Severity();
+        this.timestamp = event.Time();
     }
 
 
@@ -92,12 +91,9 @@ public class DisplayableTelematics {
     }
 
     //Utility
-    public static final Comparator<DisplayableTelematics> COMPARATOR_REVERSED = new Comparator<DisplayableTelematics>() {
-        @Override
-        public int compare(DisplayableTelematics o1, DisplayableTelematics o2) {
-            final long diff = o2.timestamp - o1.timestamp;
-            return (diff == 0) ? 0 : ((diff > 0) ? 1 : -1);
-        }
+    public static final Comparator<DisplayableTelematics> COMPARATOR_REVERSED = (o1, o2) -> {
+        final long diff = o2.timestamp - o1.timestamp;
+        return (diff == 0) ? 0 : ((diff > 0) ? 1 : -1);
     };
 
 }

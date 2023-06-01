@@ -1,5 +1,5 @@
 /* ******************************************************************************
- * Copyright 2017 Tourmaline Labs, Inc. All rights reserved.
+ * Copyright 2023 Tourmaline Labs, Inc. All rights reserved.
  * Confidential & Proprietary - Tourmaline Labs, Inc. ("TLI")
  *
  * The party receiving this software directly from TLI (the "Recipient")
@@ -18,7 +18,6 @@
  * application of any third party copyright notice to that third party's
  * code.
  ******************************************************************************/
-
 package com.tourmaline.example.adapters;
 
 import android.app.Activity;
@@ -70,6 +69,9 @@ public class LocationAdapter extends ArrayAdapter<DisplayableLocation> {
 
     private void updateLocationItemView(final View view, final DisplayableLocation displayableLocation) {
         final ViewHolder viewHolder = (ViewHolder) view.getTag();
+        if(displayableLocation == null) {
+            return;
+        }
         viewHolder.textViewLocation.setText(displayableLocation.getPosition());
         viewHolder.textViewTime.setText(displayableLocation.getTime());
         viewHolder.textViewAddress.setText(displayableLocation.getAddress());

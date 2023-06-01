@@ -6,15 +6,15 @@ repositories {
 }
 
 android {
-    compileSdkVersion 31
+    compileSdkVersion 33
 
     defaultConfig {
-        applicationId "com.tourmaline.ckexample"
-        minSdkVersion 19
-        targetSdkVersion 31
+        applicationId "com.tourmaline.tlkitexample"
+        minSdkVersion 22
+        targetSdkVersion 33
 
-        versionCode 103
-        versionName "17.4.22052301"
+        versionCode 106
+        versionName "22.0.23060200"
     }
 
     compileOptions {
@@ -28,14 +28,14 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    namespace 'com.tourmaline.example'
 }
 
 dependencies {
     //TLKit dependency
-    implementation("com.tourmalinelabs.android:TLKit:17.4.22052301")
+    implementation("com.tourmalinelabs.android:TLKit:22.0.23060200")
 
     //Android dependencies
-    implementation ('androidx.appcompat:appcompat:1.4.1')
-    implementation ('androidx.localbroadcastmanager:localbroadcastmanager:1.1.0')
-    implementation ('com.google.android.gms:play-services-location:19.0.1')
+    implementation ('androidx.appcompat:appcompat:1.6.1')
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
 }
