@@ -33,7 +33,7 @@ android {
 
 dependencies {
     //TLKit dependency
-    implementation("com.tourmalinelabs.android:TLKit:22.0.23060200")
+    implementation("com.tourmalinelabs.android:TLKit:22.1.23062602")
 
     //Android dependencies
     implementation ('androidx.appcompat:appcompat:1.6.1')

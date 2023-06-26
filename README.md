@@ -26,7 +26,7 @@ repositories {
 
 ```groovy
 dependencies {
-    implementation("com.tourmalinelabs.android:TLKit:22.0.23060200")
+    implementation("com.tourmalinelabs.android:TLKit:22.1.23062602")
 }
 ```
 
