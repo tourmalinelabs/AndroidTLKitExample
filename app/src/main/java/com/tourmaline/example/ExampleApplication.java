@@ -198,8 +198,9 @@ public class ExampleApplication extends Application {
         TLLaunchOptions options = new TLLaunchOptions();
         options.setFirstName("Bob");
         options.setLastName("Smith");
-        //options.setExternalId("my-company-identifier-xyz");
+        //options.setExternalId("my-company-user-identifier-xyz");
         //options.addGroupExternalIds(123, new String[]{"team_blue", "team_green"});
+        //options.addVehicle("my-company-vehicle-identifier-xyz", "231-4R-12"); // you can't add a vehicle if you are not in a group
 
         TLKit.Init(getApplicationContext(),
                 apiKey,

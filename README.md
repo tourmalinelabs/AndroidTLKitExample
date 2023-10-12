@@ -26,7 +26,7 @@ repositories {
 
 ```groovy
 dependencies {
-    implementation("com.tourmalinelabs.android:TLKit:22.1.23062602")
+    implementation("com.tourmalinelabs.android:TLKit:22.3.23101001")
 }
 ```
 
@@ -37,12 +37,14 @@ The following permissions will be automatically imported into your project by th
 ```xml
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
     <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION" />
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
 
@@ -191,7 +193,8 @@ During the Initialization of the TLKit you can set some values which will be sto
 - your first name
 - your last name
 - your title
-- an externalId of your choice that is tied to a specific identifier on your side
+- a user externalId of your choice that will be tied to a unique user on your side
+- a vehicle made of an externalId (tied to a unique vehicle on your side) and an optional licence plate
 
 You can also automatically join a group by providing:
 - an external identifier for that group
