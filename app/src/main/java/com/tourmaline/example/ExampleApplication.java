@@ -32,16 +32,19 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.tourmaline.apis.TLKit;
+import com.tourmaline.apis.TLLocationManager;
 import com.tourmaline.apis.listeners.TLAuthenticationListener;
 import com.tourmaline.apis.listeners.TLCompletionListener;
 import com.tourmaline.apis.listeners.TLDeviceCapabilityListener;
 import com.tourmaline.apis.listeners.TLKitDestroyListener;
 import com.tourmaline.apis.listeners.TLKitInitListener;
 import com.tourmaline.apis.listeners.TLKitSyncListener;
+import com.tourmaline.apis.listeners.TLLocationListener;
 import com.tourmaline.apis.objects.TLCloudArea;
 import com.tourmaline.apis.objects.TLDeviceCapability;
 import com.tourmaline.apis.objects.TLKitInitResult;
 import com.tourmaline.apis.objects.TLLaunchOptions;
+import com.tourmaline.apis.objects.TLLocation;
 import com.tourmaline.apis.objects.TLMonitoringMode;
 import com.tourmaline.apis.objects.TLNotificationInfo;
 import com.tourmaline.apis.util.TLDigest;
@@ -67,6 +70,7 @@ public class ExampleApplication extends Application {
     private final MutableLiveData<TLAuthenticationResult> authenticationResult = new MutableLiveData<>();
     public LiveData<Boolean> isTLKitInitialized()  { return tlKitInitialized; }
     public LiveData<TLAuthenticationResult> getAuthenticationResult() { return authenticationResult; }
+    private TLLocationListener locationListener;
 
     @Override
     public void onCreate() {
@@ -189,6 +193,7 @@ public class ExampleApplication extends Application {
                 Log.i(LOG_AREA, "TLKit Init() success");
                 setShouldRestartTLKitAtLaunch(true);
                 tlKitInitialized.postValue(true);
+                startLocationListener();
             }
             @Override public void OnFail(int i, String s) {
                 Log.e(LOG_AREA, "TLKit Init() error: " + i + " - "+ s);
@@ -214,6 +219,7 @@ public class ExampleApplication extends Application {
     }
 
     public void destroyTLKit() {
+        stopLocationListener();
         TLKit.Destroy(getApplicationContext(), new TLKitDestroyListener() {
             @Override
             public void OnDestroyed() {
@@ -223,5 +229,28 @@ public class ExampleApplication extends Application {
                 authenticationResult.postValue(new TLAuthenticationResult(TLAuthenticationResult.State.none, ""));
             }
         });
+    }
+
+    private void startLocationListener() {
+        stopLocationListener();
+        locationListener = new TLLocationListener() {
+            @Override public void OnLocationUpdated(TLLocation location) {
+                Log.d(LOG_AREA, "Got location: " + location );
+            }
+            @Override public void RegisterSucceeded() {
+                Log.d(LOG_AREA, "startLocationListener OK");
+            }
+            @Override public void RegisterFailed(int i) {
+                Log.d(LOG_AREA, "startLocationListener KO: " + i);
+            }
+        };
+        TLLocationManager.ListenForLocationEvents(locationListener);
+    }
+
+    private void stopLocationListener() {
+        if(locationListener!=null) {
+            TLLocationManager.StopListeningForLocationEvents(locationListener);
+            locationListener = null;
+        }
     }
 }

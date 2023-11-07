@@ -13,8 +13,8 @@ android {
         minSdkVersion 22
         targetSdkVersion 34
 
-        versionCode 107
-        versionName "22.3.23091500"
+        versionCode 108
+        versionName "22.3.23102601"
     }
 
     compileOptions {
@@ -33,7 +33,7 @@ android {
 
 dependencies {
     //TLKit dependency
-    implementation("com.tourmalinelabs.android:TLKit:22.3.23101001")
+    implementation("com.tourmalinelabs.android:TLKit:22.3.23102601")
 
     //Android dependencies
     implementation ('androidx.appcompat:appcompat:1.6.1')
