@@ -53,13 +53,8 @@ import com.tourmaline.apis.util.auth.TLAuthenticationResult;
 public class ExampleApplication extends Application {
     private static final String LOG_AREA = "ExampleApplication";
 
-
     // The apiKey provided to you by Tourmo
     private static final String apiKey = "bdf760a8dbf64e35832c47d8d8dffcc0";
-    // The user identifier you want to use within TLKit
-    private static final String user   = %PUT_HERE_A_USER_IDENTIFIER%  //example: "androidexample@tourmalinelabs.com";
-
-
     // Preferences to store TLKit initialization state in case of app restart (reboot, update, crash...)
     private SharedPreferences preferences;
     final private String SHOULD_RESTART_TLKIT_AT_LAUNCH_KEY = "SHOULD_RESTART_TLKIT_AT_LAUNCH_KEY";
@@ -71,6 +66,10 @@ public class ExampleApplication extends Application {
     public LiveData<Boolean> isTLKitInitialized()  { return tlKitInitialized; }
     public LiveData<TLAuthenticationResult> getAuthenticationResult() { return authenticationResult; }
     private TLLocationListener locationListener;
+
+    private TLNotificationInfo tlkitNotificationInfo;
+    private TLAuthenticationListener tlkitAuthListener;
+    private TLCompletionListener tlkitCompletionListener;
 
     @Override
     public void onCreate() {
@@ -138,9 +137,6 @@ public class ExampleApplication extends Application {
             return;
         }
 
-        // Build the hash id for login
-        String hashedUserId = TLDigest.Sha256(user);
-
         // TLKit is a foreground service, it means there is a permanent notification displayed on the device,
         // here we set what is displayed
         final String NOTIF_CHANNEL_ID = "background-run-notif-channel-id";
@@ -154,12 +150,12 @@ public class ExampleApplication extends Application {
                 notificationManager.createNotificationChannel(channel);
             }
         }
-        TLNotificationInfo notificationInfo = new TLNotificationInfo(NOTIF_CHANNEL_ID,
+        tlkitNotificationInfo = new TLNotificationInfo(NOTIF_CHANNEL_ID,
                 getString(R.string.app_name),
                 getString(R.string.foreground_notification_content_text),
                 R.mipmap.ic_foreground_notification);
 
-        TLAuthenticationListener authListener = new TLAuthenticationListener() {
+        tlkitAuthListener = new TLAuthenticationListener() {
             @Override public void OnUpdateState(TLAuthenticationResult result) {
                 authenticationResult.postValue(result);
                 switch (result.state) {
@@ -188,7 +184,7 @@ public class ExampleApplication extends Application {
             }
         };
 
-        TLCompletionListener completionListener = new TLCompletionListener() {
+        tlkitCompletionListener = new TLCompletionListener() {
             @Override public void OnSuccess() {
                 Log.i(LOG_AREA, "TLKit Init() success");
                 setShouldRestartTLKitAtLaunch(true);
@@ -200,22 +196,91 @@ public class ExampleApplication extends Application {
             }
         };
 
+        initTLKitWithHashedId();
+        //initTLKitWithHashedIdJoinGroupAndSetVehicle();
+        //initTLKitForDriverInstanceWithHashedIdJoinGroupAndSetVehicle();
+        //initTLKitWithUsernameAndPassword();
+    }
+
+    public void initTLKitWithHashedIdJoinGroup() {
+        String externalId = "BC-88329";
+        String hashedId = TLDigest.Sha256(externalId);
         TLLaunchOptions options = new TLLaunchOptions();
-        options.setFirstName("Bob");
-        options.setLastName("Smith");
-        //options.setExternalId("my-company-user-identifier-xyz");
-        //options.addGroupExternalIds(123, new String[]{"team_blue", "team_green"});
-        //options.addVehicle("my-company-vehicle-identifier-xyz", "231-4R-12"); // you can't add a vehicle if you are not in a group
+        options.setExternalId(externalId);
+        int orgId = 123;
+        String groupExternalId = "team_blue";
+        options.addGroupExternalIds(orgId, new String[]{groupExternalId});
 
         TLKit.Init(getApplicationContext(),
                 apiKey,
                 TLCloudArea.US,
-                hashedUserId,
-                authListener,
+                hashedId,
+                tlkitAuthListener,
                 TLMonitoringMode.AUTOMATIC,
-                notificationInfo,
+                tlkitNotificationInfo,
                 options,
-                completionListener);
+                tlkitCompletionListener);
+    }
+
+    public void initTLKitWithHashedIdJoinGroupAndSetVehicle() {
+        String externalId = "BC-88329";
+        String hashedId = TLDigest.Sha256(externalId);
+        TLLaunchOptions options = new TLLaunchOptions();
+        options.setExternalId(externalId);
+        int orgId = 123;
+        String groupExternalId = "team_blue";
+        options.addGroupExternalIds(orgId, new String[]{groupExternalId});
+        options.addVehicle("vehicle-identifier-xyz", "231-4R-12");
+
+        TLKit.Init(getApplicationContext(),
+                apiKey,
+                TLCloudArea.US,
+                hashedId,
+                tlkitAuthListener,
+                TLMonitoringMode.AUTOMATIC,
+                tlkitNotificationInfo,
+                options,
+                tlkitCompletionListener);
+    }
+
+    public void initTLKitForDriverInstanceWithHashedIdJoinGroupAndSetVehicle() {
+        int orgId = 123;
+        String groupExternalId = "B424";
+        String externalId = "BC-" + groupExternalId + "-88329";
+        String hashedId = TLDigest.Sha256(externalId);
+        TLLaunchOptions options = new TLLaunchOptions();
+        options.setExternalId(externalId);
+        options.addGroupExternalIds(orgId, new String[]{groupExternalId});
+        options.addVehicle("vehicle-identifier-xyz", "231-4R-12");
+
+        TLKit.Init(getApplicationContext(),
+                apiKey,
+                TLCloudArea.US,
+                hashedId,
+                tlkitAuthListener,
+                TLMonitoringMode.AUTOMATIC,
+                tlkitNotificationInfo,
+                options,
+                tlkitCompletionListener);
+    }
+
+    public void initTLKitWithUsernameAndPassword() {
+        String username = "bob.smith@tourmo.ai";
+        String password = "qwerty123";
+        TLLaunchOptions options = new TLLaunchOptions();
+        options.setFirstName("Bob");
+        options.setLastName("Smith");
+
+        TLKit.Init(getApplicationContext(),
+                apiKey,
+                TLCloudArea.US,
+                username,
+                password,
+                tlkitAuthListener,
+                TLMonitoringMode.AUTOMATIC,
+                tlkitNotificationInfo,
+                options,
+                tlkitCompletionListener);
     }
 
     public void destroyTLKit() {
