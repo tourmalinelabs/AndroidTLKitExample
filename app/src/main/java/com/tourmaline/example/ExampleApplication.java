@@ -196,7 +196,7 @@ public class ExampleApplication extends Application {
             }
         };
 
-        initTLKitWithHashedId();
+        initTLKitWithHashedIdJoinGroup();
         //initTLKitWithHashedIdJoinGroupAndSetVehicle();
         //initTLKitForDriverInstanceWithHashedIdJoinGroupAndSetVehicle();
         //initTLKitWithUsernameAndPassword();
