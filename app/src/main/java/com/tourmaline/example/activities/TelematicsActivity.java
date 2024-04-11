@@ -30,6 +30,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.tourmaline.apis.TLActivityManager;
+import com.tourmaline.apis.TLKit;
 import com.tourmaline.apis.listeners.TLQueryListener;
 import com.tourmaline.apis.listeners.TLTelematicsEventListener;
 import com.tourmaline.apis.objects.TLTelematicsEvent;
@@ -84,17 +85,17 @@ public class TelematicsActivity extends Activity {
                 }
 
                 @Override
-                public void RegisterFailed(int i) {
+                public void RegisterFailed(int reason, String message) {
                     Log.e(LOG_AREA, "Telematics Listener: register failure");
                 }
             };
         }
-        TLActivityManager.ListenForTelematicsEvents(telematicsEventListener);
+        TLKit.TLActivityManager().ListenForTelematicsEvents(telematicsEventListener);
     }
 
     private void unregisterTelematicsListener() {
         if(telematicsEventListener!=null) {
-            TLActivityManager.StopListeningForTelematicsEvents(telematicsEventListener);
+            TLKit.TLActivityManager().StopListeningForTelematicsEvents(telematicsEventListener);
             telematicsEventListener = null;
         }
     }
@@ -107,7 +108,7 @@ public class TelematicsActivity extends Activity {
         calendar.add(Calendar.DATE, -30);
         final Date startTime = calendar.getTime();
 
-        TLActivityManager.QueryTrips(startTime, endTime, 1, new TLQueryListener<ArrayList<TLTrip>>() {
+        TLKit.TLActivityManager().QueryTrips(startTime, endTime, 1, new TLQueryListener<ArrayList<TLTrip>>() {
             @Override
             public void Result(ArrayList<TLTrip> trips) {
 
@@ -115,7 +116,7 @@ public class TelematicsActivity extends Activity {
                     showNoData();
                     Progress.dismiss(TelematicsActivity.this);
                 } else {
-                    TLActivityManager.QueryTripTelematicsEvents(trips.get(0).Id().toString(), new TLQueryListener<ArrayList<TLTelematicsEvent>>() {
+                    TLKit.TLActivityManager().QueryTripTelematicsEvents(trips.get(0).Id().toString(), new TLQueryListener<ArrayList<TLTelematicsEvent>>() {
                         @Override
                         public void Result(ArrayList<TLTelematicsEvent> events) {
                             if (events != null && !events.isEmpty()) {

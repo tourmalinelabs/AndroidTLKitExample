@@ -30,6 +30,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.tourmaline.apis.TLActivityManager;
+import com.tourmaline.apis.TLKit;
 import com.tourmaline.apis.listeners.TLActivityListener;
 import com.tourmaline.apis.listeners.TLQueryListener;
 import com.tourmaline.apis.objects.TLActivityEvent;
@@ -96,17 +97,17 @@ public class TripsActivity extends Activity {
                 }
 
                 @Override
-                public void RegisterFailed( int i ) {
+                public void RegisterFailed(int reason, String message ) {
                     Log.e(LOG_AREA, "Activity Listener: register failure");
                 }
             };
         }
-        TLActivityManager.ListenForTripEvents(activityListener);
+        TLKit.TLActivityManager().ListenForTripEvents(activityListener);
     }
 
     private void unregisterTripListener() {
         if(activityListener!=null) {
-            TLActivityManager.StopListeningForTripEvents(activityListener);
+            TLKit.TLActivityManager().StopListeningForTripEvents(activityListener);
             activityListener = null;
         }
     }
@@ -147,7 +148,7 @@ public class TripsActivity extends Activity {
         final Date endTime = calendar.getTime();
         calendar.add(Calendar.DATE, -30);
         final Date startTime = calendar.getTime();
-        TLActivityManager.QueryTrips(startTime, endTime, 50, queryHandler);
+        TLKit.TLActivityManager().QueryTrips(startTime, endTime, 50, queryHandler);
     }
 
     private void showData(final ArrayList<DisplayableTrip> displayableTrips) {

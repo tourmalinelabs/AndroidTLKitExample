@@ -29,6 +29,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.tourmaline.apis.TLKit;
 import com.tourmaline.apis.TLLocationManager;
 import com.tourmaline.apis.listeners.TLLocationListener;
 import com.tourmaline.apis.listeners.TLQueryListener;
@@ -83,17 +84,17 @@ public class LocationsActivity extends Activity {
                 }
 
                 @Override
-                public void RegisterFailed(int i) {
+                public void RegisterFailed(int reason, String message) {
                     Log.e(LOG_AREA, "Location Listener: register failure");
                 }
             };
         }
-        TLLocationManager.ListenForLocationEvents(locationListener);
+        TLKit.TLLocationManager().ListenForLocationEvents(locationListener);
     }
 
     private void unregisterLocationListener() {
         if(locationListener!=null) {
-            TLLocationManager.StopListeningForLocationEvents(locationListener);
+            TLKit.TLLocationManager().StopListeningForLocationEvents(locationListener);
             locationListener = null;
         }
     }
@@ -128,7 +129,7 @@ public class LocationsActivity extends Activity {
         calendar.add(Calendar.DATE, -7);
         final Date startTime = calendar.getTime();
 
-        TLLocationManager.QueryLocations(startTime.getTime(), endTime.getTime(), 50, queryHandler);
+        TLKit.TLLocationManager().QueryLocations(startTime.getTime(), endTime.getTime(), 50, queryHandler);
     }
 
     private void showData(final ArrayList<TLLocation> locations) {

@@ -32,12 +32,15 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.tourmaline.apis.TLKit;
+import com.tourmaline.apis.util.auth.TLAuthenticationResult;
 import com.tourmaline.example.ExampleApplication;
 import com.tourmaline.example.R;
 import com.tourmaline.example.helpers.Progress;
 
 public class MainActivity extends FragmentActivity {
 
+    private LinearLayout apiLayout;
+    private Button startStopButton;
     private TextView tlkitMonitoringTextView;
     private TextView tlkitAuthenticationTextView;
     private TextView alertLocationTextView;
@@ -56,13 +59,13 @@ public class MainActivity extends FragmentActivity {
         alertBatteryTextView = findViewById(R.id.alert_battery);
 
         // tlkit
-        Button startStopButton = findViewById(R.id.start_stop_button);
+        startStopButton = findViewById(R.id.start_stop_button);
         TextView tlkitVersionTextView = findViewById(R.id.tlkit_version);
         tlkitMonitoringTextView = findViewById(R.id.tlkit_monitoring_mode);
         tlkitAuthenticationTextView = findViewById(R.id.tlkit_authentication_status);
 
         //apis
-        LinearLayout apiLayout = findViewById(R.id.api_layout);
+        apiLayout = findViewById(R.id.api_layout);
 
         permissionButton.setOnClickListener(v -> {
             final Intent intent = new Intent(MainActivity.this, MonitoringPermissionsActivity.class);
@@ -98,39 +101,49 @@ public class MainActivity extends FragmentActivity {
             startActivity(intent);
         });
 
+        setInitializeState(false);
         ((ExampleApplication)getApplication()).isTLKitInitialized().observe(this, initialized -> {
-            Progress.dismiss(MainActivity.this);
-            if(initialized) {
-                apiLayout.setVisibility(View.VISIBLE);
-                tlkitMonitoringTextView.setVisibility(View.VISIBLE);
-                tlkitAuthenticationTextView.setVisibility(View.VISIBLE);
-                tlkitMonitoringTextView.setText(getResources().getString(R.string.monitoring_mode, getResources().getString(R.string.automatic_monitoring)));
-                startStopButton.setText(R.string.stop_monitoring);
-            } else {
-                apiLayout.setVisibility(View.GONE);
-                tlkitMonitoringTextView.setVisibility(View.GONE);
-                tlkitAuthenticationTextView.setVisibility(View.GONE);
-                startStopButton.setText(R.string.start_monitoring);
-            }
+            setInitializeState(initialized);
         });
 
+        setAuthenticationState(TLAuthenticationResult.State.none);
         ((ExampleApplication)getApplication()).getAuthenticationResult().observe(this, result -> {
-            int color;
-            switch (result.state) {
-                case none:
-                    color = R.color.black;
-                    break;
-                case authenticated:
-                    color = R.color.green;
-                    break;
-                default:
-                    color = R.color.red;
-                    break;
-            }
-            tlkitAuthenticationTextView.setTextColor(ContextCompat.getColor(this, color));
-            tlkitAuthenticationTextView.setText(getResources().getString(R.string.authentication_status, result.state));
+            setAuthenticationState(result.state);
         });
 
+    }
+
+    private void setInitializeState(boolean initialized) {
+        Progress.dismiss(MainActivity.this);
+        if(initialized) {
+            apiLayout.setVisibility(View.VISIBLE);
+            tlkitMonitoringTextView.setVisibility(View.VISIBLE);
+            tlkitAuthenticationTextView.setVisibility(View.VISIBLE);
+            tlkitMonitoringTextView.setText(getResources().getString(R.string.monitoring_mode, getResources().getString(R.string.automatic_monitoring)));
+            startStopButton.setText(R.string.stop_monitoring);
+        } else {
+            apiLayout.setVisibility(View.GONE);
+            tlkitMonitoringTextView.setVisibility(View.GONE);
+            tlkitAuthenticationTextView.setVisibility(View.GONE);
+            startStopButton.setText(R.string.start_monitoring);
+        }
+    }
+
+    private void setAuthenticationState(TLAuthenticationResult.State state) {
+        int color;
+        switch (state) {
+            case none:
+                color = R.color.black;
+                break;
+            case authenticated:
+                color = R.color.green;
+                break;
+            default:
+                color = R.color.red;
+                break;
+        }
+        tlkitAuthenticationTextView.setTextColor(ContextCompat.getColor(this, color));
+        tlkitAuthenticationTextView.setText(getResources().getString(R.string.authentication_status, state));
     }
 
     @Override

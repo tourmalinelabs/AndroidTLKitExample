@@ -1,3 +1,45 @@
+# Migration guide from TLKit 22.x.xyz to TLKit 23.x.xyz
+
+## Init TLKit after an app relaunch
+It is now up to the integrator know if TLKit was initialized when the app is launch.
+TLKitInitListener has been removed consequently if the app has been killed by the system or after a crash it is the responsibility of the integrator to call ```TlKit.Init()``` in the ```onCreate()``` callback of the application class.
+
+## Remove TLKit.OnApplicationCreate()
+The ```TLKit.OnApplicationCreate()``` has been removed and you have to pass the ```TLDeviceCapabilityListener``` and the ```TLKitSyncListener``` in the ```TLKit.Init()``` function.
+Those listeners are now optional.
+
+## Foreground service notification
+There is no need anymore to provide the notification parameters in the ```TLKit.Init()``` TLKit embbed 3 resources:
+- the notification icon
+- the notification text
+- the notification channel title
+It is still possible to override those resources:
+
+For overriding the icon you have to provide in your application 6 png files named tlkit_foreground_service_notif_icon.png in the following folders with the correct resolution:
+- Drawable         18x18
+- Drawable-hdpi    24x24 
+- Drawable-mdpi    36x36
+- Drawable-xhdpi   48x48
+- Drawable-xxhdpi  72x72
+- Drawable-xxxhdpi 96x96
+
+For overriding the texts you have to provide the strings in your resource files for the following keys:
+
+```
+<string name="tlkit_foreground_service_notif_channel_name">Background monitoring</string>
+<string name="tlkit_foreground_service_notif_text">Monitoring your activity</string>
+```
+
+## Thread safe callbacks
+Every time you will receive a callback from the SDK it will be in the same thread you made the request.
+Examples: 
+- ```TLKit.TLActivityManger().QueryTrips()```
+- ```TLKit.TLLocationmanger().ListenForLocationUpdates()```
+
+## Accces to the managers
+TLLocationManager, TLActivityManager and TLFleetManger do not contain static method anymore. You will get access to the instances through the TLKit class ```TLKit.TLLocationManager()```, ```TlKit.TLActivityManager()``` and ```TlKit.TLFleetManger()```
+
+
 
 # Migration guide from TLKit 17.x.xyz to TLKit 22.x.xyz
 

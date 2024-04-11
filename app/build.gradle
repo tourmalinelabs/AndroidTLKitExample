@@ -1,20 +1,19 @@
 
 apply plugin: 'com.android.application'
-
 repositories {
     maven { url 'https://raw.githubusercontent.com/tourmalinelabs/AndroidTLKitSDK/master' }
 }
 
 android {
-    compileSdkVersion 34
+    compileSdk 34
 
     defaultConfig {
         applicationId "com.tourmaline.tlkitexample"
         minSdkVersion 22
         targetSdkVersion 34
 
-        versionCode 108
-        versionName "22.3.23102601"
+        versionCode 109
+        versionName "23.0.24032100"
     }
 
     compileOptions {
@@ -24,7 +23,8 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
@@ -33,7 +33,7 @@ android {
 
 dependencies {
     //TLKit dependency
-    implementation("com.tourmalinelabs.android:TLKit:22.3.23102601")
+    implementation("com.tourmalinelabs.android:TLKit:23.0.24032100")
 
     //Android dependencies
     implementation ('androidx.appcompat:appcompat:1.6.1')

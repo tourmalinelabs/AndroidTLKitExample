@@ -21,32 +21,25 @@
 package com.tourmaline.example;
 
 import android.app.Application;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.Build;
 import android.util.Log;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.tourmaline.apis.TLKit;
-import com.tourmaline.apis.TLLocationManager;
 import com.tourmaline.apis.listeners.TLAuthenticationListener;
 import com.tourmaline.apis.listeners.TLCompletionListener;
 import com.tourmaline.apis.listeners.TLDeviceCapabilityListener;
 import com.tourmaline.apis.listeners.TLKitDestroyListener;
-import com.tourmaline.apis.listeners.TLKitInitListener;
 import com.tourmaline.apis.listeners.TLKitSyncListener;
 import com.tourmaline.apis.listeners.TLLocationListener;
 import com.tourmaline.apis.objects.TLCloudArea;
 import com.tourmaline.apis.objects.TLDeviceCapability;
-import com.tourmaline.apis.objects.TLKitInitResult;
 import com.tourmaline.apis.objects.TLLaunchOptions;
 import com.tourmaline.apis.objects.TLLocation;
 import com.tourmaline.apis.objects.TLMonitoringMode;
-import com.tourmaline.apis.objects.TLNotificationInfo;
 import com.tourmaline.apis.util.TLDigest;
 import com.tourmaline.apis.util.auth.TLAuthenticationResult;
 
@@ -65,61 +58,16 @@ public class ExampleApplication extends Application {
     private final MutableLiveData<TLAuthenticationResult> authenticationResult = new MutableLiveData<>();
     public LiveData<Boolean> isTLKitInitialized()  { return tlKitInitialized; }
     public LiveData<TLAuthenticationResult> getAuthenticationResult() { return authenticationResult; }
-    private TLLocationListener locationListener;
 
-    private TLNotificationInfo tlkitNotificationInfo;
-    private TLAuthenticationListener tlkitAuthListener;
-    private TLCompletionListener tlkitCompletionListener;
+    private TLCompletionListener tlCompletionListener;
 
     @Override
     public void onCreate() {
         super.onCreate();
 
-        //Convenience
         preferences = getSharedPreferences("tourmo", Context.MODE_PRIVATE);
         tlKitInitialized.postValue(false);
         authenticationResult.postValue(new TLAuthenticationResult(TLAuthenticationResult.State.none, ""));
-
-        // Call this function whenever the app is created
-        TLKit.OnApplicationCreate(getApplicationContext(),
-                new TLKitInitListener() {
-                    @Override public void onEngineInit(TLKitInitResult result) {
-                        // Initialization is already handled in the TLCompletionListener of the TLKit.Init()
-                    }
-                }, new TLDeviceCapabilityListener() {
-                    @Override public void onCapabilityUpdate(TLDeviceCapability capability) {
-                        if (capability.locationPermissionGranted) {
-                            Log.i(LOG_AREA, "locationPermissionGranted true");
-                            if (capability.gpsEnabled) {
-                                Log.i(LOG_AREA, "gpsEnabled true");
-                            } else {
-                                Log.e(LOG_AREA, "gpsEnabled false");
-                            }
-                        } else {
-                            Log.e(LOG_AREA, "locationPermissionGranted false");
-                        }
-                        if (capability.activityPermissionGranted) {
-                            Log.i(LOG_AREA, "activityPermissionGranted true");
-                        } else {
-                            Log.e(LOG_AREA, "activityPermissionGranted false");
-                        }
-                        if (capability.powerSavingEnabled) {
-                            Log.e(LOG_AREA, "powerSavingEnabled true");
-                        } else {
-                            Log.i(LOG_AREA, "powerSavingEnabled false");
-                        }
-                        if (capability.batteryOptimisationEnabled) {
-                            Log.e(LOG_AREA, "batteryOptimisationEnabled true");
-                        } else {
-                            Log.i(LOG_AREA, "batteryOptimisationEnabled false");
-                        }
-                    }
-                }, new TLKitSyncListener() {
-                    @Override public void onEngineSynchronized() {
-                        //All records have been processed and sent to our infrastructure
-                        Log.i(LOG_AREA, "TLKit is synchronized");
-                    }
-                });
 
         // That is very important to call TLKit.Init(...) as quickly as possible to ensure that the
         // keep alive mechanism is effectively set before Android OS decides to kill the app.
@@ -137,54 +85,7 @@ public class ExampleApplication extends Application {
             return;
         }
 
-        // TLKit is a foreground service, it means there is a permanent notification displayed on the device,
-        // here we set what is displayed
-        final String NOTIF_CHANNEL_ID = "background-run-notif-channel-id";
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            NotificationChannel channel = new NotificationChannel(NOTIF_CHANNEL_ID,
-                    getText(R.string.foreground_notification_channel_title),
-                    NotificationManager.IMPORTANCE_LOW);
-            channel.setShowBadge(false);
-            if(notificationManager!=null) {
-                notificationManager.createNotificationChannel(channel);
-            }
-        }
-        tlkitNotificationInfo = new TLNotificationInfo(NOTIF_CHANNEL_ID,
-                getString(R.string.app_name),
-                getString(R.string.foreground_notification_content_text),
-                R.mipmap.ic_foreground_notification);
-
-        tlkitAuthListener = new TLAuthenticationListener() {
-            @Override public void OnUpdateState(TLAuthenticationResult result) {
-                authenticationResult.postValue(result);
-                switch (result.state) {
-                    case none:
-                        Log.i(LOG_AREA, "TLKit authentication none");
-                        break;
-                    case authenticated:
-                        Log.i(LOG_AREA, "TLKit authentication authenticated");
-                        break;
-                    case pwd_expired:
-                        Log.e(LOG_AREA, "TLKit authentication pwd_expired");
-                        break;
-                    case invalid_credentials:
-                        Log.e(LOG_AREA, "TLKit authentication invalid_credentials");
-                        break;
-                    case user_disabled:
-                        Log.e(LOG_AREA, "TLKit authentication user_disabled");
-                        break;
-                    case unactivated:
-                        Log.e(LOG_AREA, "TLKit authentication unactivated");
-                        break;
-                    default:
-                        Log.e(LOG_AREA, "TLKit authentication error: " + result.message);
-                        break;
-                }
-            }
-        };
-
-        tlkitCompletionListener = new TLCompletionListener() {
+        tlCompletionListener = new TLCompletionListener() {
             @Override public void OnSuccess() {
                 Log.i(LOG_AREA, "TLKit Init() success");
                 setShouldRestartTLKitAtLaunch(true);
@@ -215,11 +116,12 @@ public class ExampleApplication extends Application {
                 apiKey,
                 TLCloudArea.US,
                 hashedId,
-                tlkitAuthListener,
+                tlAuthListener,
                 TLMonitoringMode.AUTOMATIC,
-                tlkitNotificationInfo,
                 options,
-                tlkitCompletionListener);
+                tlDeviceCapListener,
+                tlSyncListener,
+                tlCompletionListener);
     }
 
     public void initTLKitWithHashedIdJoinGroupAndSetVehicle() {
@@ -236,11 +138,12 @@ public class ExampleApplication extends Application {
                 apiKey,
                 TLCloudArea.US,
                 hashedId,
-                tlkitAuthListener,
+                tlAuthListener,
                 TLMonitoringMode.AUTOMATIC,
-                tlkitNotificationInfo,
                 options,
-                tlkitCompletionListener);
+                tlDeviceCapListener,
+                tlSyncListener,
+                tlCompletionListener);
     }
 
     public void initTLKitForDriverInstanceWithHashedIdJoinGroupAndSetVehicle() {
@@ -257,11 +160,12 @@ public class ExampleApplication extends Application {
                 apiKey,
                 TLCloudArea.US,
                 hashedId,
-                tlkitAuthListener,
+                tlAuthListener,
                 TLMonitoringMode.AUTOMATIC,
-                tlkitNotificationInfo,
                 options,
-                tlkitCompletionListener);
+                tlDeviceCapListener,
+                tlSyncListener,
+                tlCompletionListener);
     }
 
     public void initTLKitWithUsernameAndPassword() {
@@ -276,16 +180,17 @@ public class ExampleApplication extends Application {
                 TLCloudArea.US,
                 username,
                 password,
-                tlkitAuthListener,
+                tlAuthListener,
                 TLMonitoringMode.AUTOMATIC,
-                tlkitNotificationInfo,
                 options,
-                tlkitCompletionListener);
+                tlDeviceCapListener,
+                tlSyncListener,
+                tlCompletionListener);
     }
 
     public void destroyTLKit() {
         stopLocationListener();
-        TLKit.Destroy(getApplicationContext(), new TLKitDestroyListener() {
+        TLKit.Destroy(new TLKitDestroyListener() {
             @Override
             public void OnDestroyed() {
                 Log.i(LOG_AREA, "TLKit destroyed");
@@ -296,26 +201,88 @@ public class ExampleApplication extends Application {
         });
     }
 
+    private TLLocationListener locationListener;
+
     private void startLocationListener() {
         stopLocationListener();
         locationListener = new TLLocationListener() {
-            @Override public void OnLocationUpdated(TLLocation location) {
-                Log.d(LOG_AREA, "Got location: " + location );
-            }
-            @Override public void RegisterSucceeded() {
-                Log.d(LOG_AREA, "startLocationListener OK");
-            }
-            @Override public void RegisterFailed(int i) {
-                Log.d(LOG_AREA, "startLocationListener KO: " + i);
-            }
+            @Override public void OnLocationUpdated(TLLocation location) {}
+            @Override public void RegisterSucceeded() {}
+            @Override public void RegisterFailed(int reason, String message) {}
         };
-        TLLocationManager.ListenForLocationEvents(locationListener);
+        TLKit.TLLocationManager().ListenForLocationEvents(locationListener);
     }
 
     private void stopLocationListener() {
         if(locationListener!=null) {
-            TLLocationManager.StopListeningForLocationEvents(locationListener);
+            TLKit.TLLocationManager().StopListeningForLocationEvents(locationListener);
             locationListener = null;
         }
     }
+
+    private final TLAuthenticationListener tlAuthListener = new TLAuthenticationListener() {
+        @Override public void OnUpdateState(TLAuthenticationResult result) {
+            authenticationResult.postValue(result);
+            switch (result.state) {
+                case none:
+                    Log.i(LOG_AREA, "TLKit authentication none");
+                    break;
+                case authenticated:
+                    Log.i(LOG_AREA, "TLKit authentication authenticated");
+                    break;
+                case pwd_expired:
+                    Log.e(LOG_AREA, "TLKit authentication pwd_expired");
+                    break;
+                case invalid_credentials:
+                    Log.e(LOG_AREA, "TLKit authentication invalid_credentials");
+                    break;
+                case user_disabled:
+                    Log.e(LOG_AREA, "TLKit authentication user_disabled");
+                    break;
+                case unactivated:
+                    Log.e(LOG_AREA, "TLKit authentication unactivated");
+                    break;
+                default:
+                    Log.e(LOG_AREA, "TLKit authentication error: " + result.message);
+                    break;
+            }
+        }
+    };
+
+    private final TLDeviceCapabilityListener tlDeviceCapListener = new TLDeviceCapabilityListener() {
+        @Override public void onCapabilityUpdate(TLDeviceCapability capability) {
+            if (capability.locationPermissionGranted) {
+                Log.i(LOG_AREA, "locationPermissionGranted true");
+                if (capability.gpsEnabled) {
+                    Log.i(LOG_AREA, "gpsEnabled true");
+                } else {
+                    Log.e(LOG_AREA, "gpsEnabled false");
+                }
+            } else {
+                Log.e(LOG_AREA, "locationPermissionGranted false");
+            }
+            if (capability.activityPermissionGranted) {
+                Log.i(LOG_AREA, "activityPermissionGranted true");
+            } else {
+                Log.e(LOG_AREA, "activityPermissionGranted false");
+            }
+            if (capability.powerSavingEnabled) {
+                Log.e(LOG_AREA, "powerSavingEnabled true");
+            } else {
+                Log.i(LOG_AREA, "powerSavingEnabled false");
+            }
+            if (capability.batteryOptimisationEnabled) {
+                Log.e(LOG_AREA, "batteryOptimisationEnabled true");
+            } else {
+                Log.i(LOG_AREA, "batteryOptimisationEnabled false");
+            }
+        }
+    };
+
+    private final TLKitSyncListener tlSyncListener = new TLKitSyncListener() {
+        @Override public void onEngineSynchronized() {
+            //All records have been processed and sent to our infrastructure
+            Log.i(LOG_AREA, "TLKit is synchronized");
+        }
+    };
 }
