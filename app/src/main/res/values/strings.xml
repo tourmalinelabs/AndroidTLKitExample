@@ -57,8 +57,8 @@
     <string name="monitoring_permission_not_granted">not granted</string>
 
     <!--Notification-->
-    <string name="foreground_notification_content_text">Automatically detecting and logging your travels for driving score computation.</string>
-    <string name="foreground_notification_channel_title">Background run</string>
+    <string name="tlkit_foreground_service_notif_text">Automatically detecting and logging your travels for driving score computation.</string>
+    <string name="tlkit_foreground_service_notif_channel_name">Background run</string>
     <string name="gps_notif_title">GPS off</string>
     <string name="permission_notif_title">Location Permission denied</string>
     <string name="permission_notif_text">can\'t work.</string>
