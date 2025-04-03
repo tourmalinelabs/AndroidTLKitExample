@@ -24,9 +24,11 @@ import android.content.Context;
 import android.text.format.DateUtils;
 
 import com.tourmaline.apis.objects.TLTelematicsEvent;
+import com.tourmaline.apis.objects.TLTrip;
 
 import java.text.DecimalFormat;
 import java.util.Comparator;
+import java.util.UUID;
 
 
 public class DisplayableTelematics {
@@ -36,11 +38,17 @@ public class DisplayableTelematics {
     final private String speed;
     final private String time;
     final private long timestamp;
-    final private String tripId;
     final private String type;
+    private String tripId = null;
 
     public DisplayableTelematics(final Context context, final TLTelematicsEvent event) {
-        this.tripId = event.TripId();
+        TLTrip trip = event.Trip();
+        if (trip != null) {
+            UUID uuid = trip.Id();
+            if (uuid != null) {
+                this.tripId = uuid.toString();
+            }
+        }
 
         switch (event.Type()) {
             case ACCEL: this.type = "Type: ACCEL"; break;

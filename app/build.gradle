@@ -5,15 +5,15 @@ repositories {
 }
 
 android {
-    compileSdk 34
+    compileSdk 35
 
     defaultConfig {
         applicationId "com.tourmaline.tlkitexample"
         minSdkVersion 22
-        targetSdkVersion 34
+        targetSdkVersion 35
 
-        versionCode 110
-        versionName "23.0.24052900"
+        versionCode 111
+        versionName "23.2.25040300"
     }
 
     compileOptions {
@@ -33,9 +33,9 @@ android {
 
 dependencies {
     //TLKit dependency
-    implementation("com.tourmalinelabs.android:TLKit:23.0.24052900")
+    implementation("com.tourmalinelabs.android:TLKit:23.2.25040300")
 
     //Android dependencies
     implementation ('androidx.appcompat:appcompat:1.7.0')
-    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+    implementation("androidx.constraintlayout:constraintlayout:2.2.1")
 }
