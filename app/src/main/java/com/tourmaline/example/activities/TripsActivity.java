@@ -34,6 +34,7 @@ import com.tourmaline.apis.TLKit;
 import com.tourmaline.apis.listeners.TLActivityListener;
 import com.tourmaline.apis.listeners.TLQueryListener;
 import com.tourmaline.apis.objects.TLActivityEvent;
+import com.tourmaline.apis.objects.TLError;
 import com.tourmaline.apis.objects.TLTrip;
 import com.tourmaline.example.adapters.DisplayableTrip;
 import com.tourmaline.example.adapters.TripAdapter;
@@ -135,11 +136,11 @@ public class TripsActivity extends Activity {
             }
 
             @Override
-            public void OnFail( int i, String s ) {
-                final String error = "Query failed with err: " + i + " -> " + s;
-                Log.e(LOG_AREA, error);
+            public void OnFail( int i, TLError error ) {
+                final String err = "Query failed with err: " + i + " -> " + error;
+                Log.e(LOG_AREA, err);
                 Progress.dismiss(TripsActivity.this);
-                showError(error);
+                showError(err);
                 showNoData();
             }
         };

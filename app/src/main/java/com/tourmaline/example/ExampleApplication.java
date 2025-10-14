@@ -37,6 +37,7 @@ import com.tourmaline.apis.listeners.TLKitSyncListener;
 import com.tourmaline.apis.listeners.TLLocationListener;
 import com.tourmaline.apis.objects.TLCloudArea;
 import com.tourmaline.apis.objects.TLDeviceCapability;
+import com.tourmaline.apis.objects.TLError;
 import com.tourmaline.apis.objects.TLLaunchOptions;
 import com.tourmaline.apis.objects.TLLocation;
 import com.tourmaline.apis.objects.TLMonitoringMode;
@@ -92,8 +93,8 @@ public class ExampleApplication extends Application {
                 tlKitInitialized.postValue(true);
                 startLocationListener();
             }
-            @Override public void OnFail(int i, String s) {
-                Log.e(LOG_AREA, "TLKit Init() error: " + i + " - "+ s);
+            @Override public void OnFail(int i, TLError error) {
+                Log.e(LOG_AREA, "TLKit Init() error: " + i + " - "+ error);
             }
         };
 

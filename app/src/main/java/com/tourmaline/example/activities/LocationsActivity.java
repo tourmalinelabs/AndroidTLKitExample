@@ -33,6 +33,7 @@ import com.tourmaline.apis.TLKit;
 import com.tourmaline.apis.TLLocationManager;
 import com.tourmaline.apis.listeners.TLLocationListener;
 import com.tourmaline.apis.listeners.TLQueryListener;
+import com.tourmaline.apis.objects.TLError;
 import com.tourmaline.apis.objects.TLLocation;
 import com.tourmaline.example.R;
 import com.tourmaline.example.adapters.DisplayableLocation;
@@ -115,10 +116,10 @@ public class LocationsActivity extends Activity {
                 Progress.dismiss(LocationsActivity.this);
             }
             @Override
-            public void OnFail( int i, String s ) {
-                final String error = "Query failed with err: " + i + " -> " + s;
-                Log.e(LOG_AREA, error);
-                showError(error);
+            public void OnFail(int i, TLError error) {
+                final String err = "Query failed with err: " + i + " -> " + error;
+                Log.e(LOG_AREA, err);
+                showError(err);
                 showNoData();
                 Progress.dismiss(LocationsActivity.this);
             }

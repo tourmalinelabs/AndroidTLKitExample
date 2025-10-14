@@ -33,6 +33,7 @@ import com.tourmaline.apis.TLActivityManager;
 import com.tourmaline.apis.TLKit;
 import com.tourmaline.apis.listeners.TLQueryListener;
 import com.tourmaline.apis.listeners.TLTelematicsEventListener;
+import com.tourmaline.apis.objects.TLError;
 import com.tourmaline.apis.objects.TLTelematicsEvent;
 import com.tourmaline.apis.objects.TLTrip;
 import com.tourmaline.example.R;
@@ -130,10 +131,10 @@ public class TelematicsActivity extends Activity {
                         }
 
                         @Override
-                        public void OnFail(int i, String s) {
-                            final String error = "Query failed with err: " + i + " -> " + s;
-                            Log.e(LOG_AREA, error);
-                            showError(error);
+                        public void OnFail(int i, TLError error) {
+                            final String err = "Query failed with err: " + i + " -> " + error;
+                            Log.e(LOG_AREA, err);
+                            showError(err);
                             showNoData();
                             Progress.dismiss(TelematicsActivity.this);
                         }
@@ -143,10 +144,10 @@ public class TelematicsActivity extends Activity {
             }
 
             @Override
-            public void OnFail(int i, String s) {
-                final String error = "Query failed with err: " + i + " -> " + s;
-                Log.e(LOG_AREA, error);
-                showError(error);
+            public void OnFail(int i, TLError error) {
+                final String err = "Query failed with err: " + i + " -> " + error;
+                Log.e(LOG_AREA, err);
+                showError(err);
                 showNoData();
                 Progress.dismiss(TelematicsActivity.this);
             }
