@@ -30,15 +30,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.tourmaline.apis.TLKit;
-import com.tourmaline.apis.TLLocationManager;
 import com.tourmaline.apis.listeners.TLLocationListener;
 import com.tourmaline.apis.listeners.TLQueryListener;
 import com.tourmaline.apis.objects.TLError;
 import com.tourmaline.apis.objects.TLLocation;
-import com.tourmaline.example.R;
 import com.tourmaline.example.adapters.DisplayableLocation;
 import com.tourmaline.example.adapters.LocationAdapter;
 import com.tourmaline.example.helpers.Progress;
+import com.tourmo.example.R;
 
 import java.util.ArrayList;
 import java.util.Calendar;

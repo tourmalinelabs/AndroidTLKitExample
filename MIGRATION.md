@@ -71,7 +71,7 @@ Here is the new initialization method:
 TLKit.Init(getApplicationContext(),
             ApiKey,
             TLCloudArea.US,
-            TLDigect.Sha256("androidexample@tourmalinelabs.com"),
+            TLDigect.Sha256("androidexample@tourmo.ai"),
             new TLAuthenticationListener() {...},
             TLMonitoringMode.AUTOMATIC,
             notificationInfo,

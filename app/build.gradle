@@ -5,15 +5,15 @@ repositories {
 }
 
 android {
-    compileSdk 35
+    compileSdk 36
 
     defaultConfig {
-        applicationId "com.tourmaline.tlkitexample"
-        minSdkVersion 22
-        targetSdkVersion 35
+        applicationId "com.tourmo.tlkit.example"
+        minSdkVersion 23
+        targetSdkVersion 36
 
-        versionCode 112
-        versionName "23.2.25101002"
+        versionCode 113
+        versionName "24.0.26030501"
     }
 
     compileOptions {
@@ -28,12 +28,12 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    namespace 'com.tourmaline.example'
+    namespace 'com.tourmo.example'
 }
 
 dependencies {
     //TLKit dependency
-    implementation("com.tourmalinelabs.android:TLKit:23.2.25101002")
+    implementation("com.tourmalinelabs.android:TLKit:24.0.26030501")
 
     //Android dependencies
     implementation ('androidx.appcompat:appcompat:1.7.1')

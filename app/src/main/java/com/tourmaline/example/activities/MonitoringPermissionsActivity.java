@@ -39,7 +39,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
-import com.tourmaline.example.R;
+import com.tourmo.example.R;
 
 public class MonitoringPermissionsActivity extends FragmentActivity {
 

@@ -22,20 +22,19 @@ package com.tourmaline.example.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
-
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.FragmentActivity;
-
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.FragmentActivity;
+
 import com.tourmaline.apis.TLKit;
 import com.tourmaline.apis.util.auth.TLAuthenticationResult;
 import com.tourmaline.example.ExampleApplication;
-import com.tourmaline.example.R;
 import com.tourmaline.example.helpers.Progress;
+import com.tourmo.example.R;
 
 public class MainActivity extends FragmentActivity {
 

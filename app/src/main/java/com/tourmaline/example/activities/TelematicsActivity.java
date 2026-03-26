@@ -29,17 +29,16 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.tourmaline.apis.TLActivityManager;
 import com.tourmaline.apis.TLKit;
 import com.tourmaline.apis.listeners.TLQueryListener;
 import com.tourmaline.apis.listeners.TLTelematicsEventListener;
 import com.tourmaline.apis.objects.TLError;
 import com.tourmaline.apis.objects.TLTelematicsEvent;
 import com.tourmaline.apis.objects.TLTrip;
-import com.tourmaline.example.R;
 import com.tourmaline.example.adapters.DisplayableTelematics;
 import com.tourmaline.example.adapters.TelematicsAdapter;
 import com.tourmaline.example.helpers.Progress;
+import com.tourmo.example.R;
 
 import java.util.ArrayList;
 import java.util.Calendar;

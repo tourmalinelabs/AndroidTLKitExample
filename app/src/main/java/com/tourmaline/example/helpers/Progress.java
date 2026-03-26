@@ -23,7 +23,7 @@ package com.tourmaline.example.helpers;
 import android.app.Activity;
 import android.app.ProgressDialog;
 
-import com.tourmaline.example.R;
+import com.tourmo.example.R;
 
 public class Progress {
 

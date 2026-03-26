@@ -21,14 +21,15 @@
 package com.tourmaline.example.adapters;
 
 import android.app.Activity;
-import androidx.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-import com.tourmaline.example.R;
+import androidx.annotation.NonNull;
+
+import com.tourmo.example.R;
 
 import java.util.List;
 

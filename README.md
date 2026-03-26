@@ -26,7 +26,7 @@ repositories {
 
 ```groovy
 dependencies {
-    implementation("com.tourmalinelabs.android:TLKit:23.2.25101002")
+    implementation("com.tourmalinelabs.android:TLKit:24.0.26030501")
 }
 ```
 
@@ -139,7 +139,7 @@ public void initTLKit() {
      TLKit.Init(getApplicationContext(),
                 apiKey,
                 TLCloudArea.US,
-                TLDigest.Sha256("androidexample@tourmalinelabs.com"),
+                TLDigest.Sha256("androidexample@tourmo.ai"),
                 new TLAuthenticationListener() {...},
                 TLMonitoringMode.AUTOMATIC,
                 options,
@@ -347,7 +347,7 @@ TLKit.TLActivityManager().QueryTripTelematicsEvents("acae3146-1f64-4f0d-9cfa-3c5
 
 As crashes may happen and disturb the activity recording, it is important to monitor the app health by using a crash reporter. To give integrators the choice of tools as well as to avoid dependency conflicts, TLKit does not embed any crash reporting tool into the sdk. We highly recommend that integrators install a third-party crash reporting library such as Firebase Crashlytics, Sentry, etc.
 
-At Tourmaline Labs we are using Firebase Crashlytics in our own apps:
+We use Firebase Crashlytics in our own apps:
 https://firebase.google.com/docs/crashlytics/get-started
 
 Whatever tool you choose you will need to provide symbols files, you can download them for TLKit version xx.y.zzz at https://s3.amazonaws.com/tlkit-android-symbols/TLKit-xx.y.zzz-symbols.zip
